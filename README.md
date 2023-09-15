@@ -1,6 +1,6 @@
 8031 Matrix Controller
 ===
 
-This an update and tentative to finish old college project from 1996, to control
-16x16 led matrix with 8031 microcontroller. Recently I found the old circuits and
-papers with schematics and pinout, so, let's try out. 
+This is an update and attempt to finish an old high school project from 1996, to 
+control a 16x16 LED matrix with an 8031 microcontroller. I recently found old 
+circuits and papers with schematics and pinouts, so let's try it out.
