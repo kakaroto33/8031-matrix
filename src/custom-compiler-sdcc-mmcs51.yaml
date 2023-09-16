@@ -37,3 +37,43 @@ compilers:
 # define __naked
 # define __critical
 # define __trap
+########## FROM MANUAL 3.17 Defines Created by the Compiler
+#  __SDCC_mcs51 or __SDCC_ds390 or __SDCC_z80, etc. depending on the model used (e.g.: -mds390). Older versions used SDCC_mcs51, etc instead.
+#  __SDCC_STACK_AUTO
+#  when —stack-auto option is used
+#  __SDCC_MODEL_SMALL
+#  when —model-small is used
+#  __SDCC_MODEL_MEDIUM
+#  when —model-medium is used
+#  __SDCC_MODEL_LARGE
+#  when —model-large is used
+#  __SDCC_MODEL_HUGE
+#  when —model-huge is used
+#  __SDCC_USE_XSTACK
+#  when —xstack option is used
+#  __SDCC_STACK_TENBIT
+#  when -mds390 is used
+#  __SDCC_MODEL_FLAT24
+#  when -mds390 is used
+#  __SDCC_VERSION_MAJOR
+#  Always defined. SDCC major version number. E.g. 3 for SDCC 3.5.0
+#  __SDCC_VERSION_MINOR
+#  Always defined. SDCC minor version number. E.g. 5 for SDCC 3.5.0
+#  __SDCC_VERSION_PATCH
+#  Always defined. SDCC patchlevel version number. E.g. 0 for SDCC 3.5.0
+#  __SDCC_REVISION
+#  Always defined. SDCC svn revision number. Older versions of sdcc used SDCC_REVISION instead.
+#  SDCC_PARMS_IN_BANK1
+#  when —parms-in-bank1 is used
+#  __SDCC_ALL_CALLEE_SAVES
+#  when —all-callee-saves is used
+#  __SDCC_FLOAT_REENT
+#  when —float-reent is used
+#  __SDCC_INT_LONG_REENT
+#  when —int-long-reent is used
+#  __SDCC_OPTIMIZE_SPEED
+#  when —opt-code-speed is used
+#  __SDCC_OPTIMIZE_SIZE
+#  when —opt-code-size is used
+#  __SDCCCALL
+#  Default ABI version for calling convention

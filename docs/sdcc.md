@@ -31,8 +31,9 @@ REf:
 - https://cmake.org/cmake/help/latest/command/add_custom_command.html#command:add_custom_command
 - https://www.analog.com/en/app-notes/using-the-free-sdcc-c-compiler-to-develop-firmware-for-the-ds89c430450-family-of-microcontrollers.html
 - https://embarcados.com.br/compilando-c-para-8051-com-sdcc/
-- file:///C:/Program%20Files/SDCC/doc/sdccman.html/node104.html
+- https://wiki.laptop.org/go/SDCC
 
+- file:///C:/Program%20Files/SDCC/doc/sdccman.html/node104.html
 
 
 
