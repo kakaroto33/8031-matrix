@@ -80,8 +80,8 @@ unsigned char led_matrix_db = 0x00;     // 8 Bytes: Keep LED state on latch MATR
  * @param state
  * @return void
  */
-void setMatrixStatus(unsigned char led, bool state) {
-
+void set_matrix_status(unsigned char led, bool state)
+{
     // To identify matrix latch, wee are added 0x01 on LED ID of latch B
     if (led & 0x01) {
         led = led & 0xfe;                                   // Set bit 0 to 0
@@ -103,7 +103,8 @@ void setMatrixStatus(unsigned char led, bool state) {
  * Update Matrix A and Led States
  * @param value
  */
-void updateMatrixDataA(unsigned char value) {
+void update_matrix_da(unsigned char value)
+{
     MATRIX_DA = value | led_matrix_da;
 }
 
@@ -111,10 +112,79 @@ void updateMatrixDataA(unsigned char value) {
  * Update Matrix B and Led States
  * @param value
  */
-void updateMatrixDataB(unsigned char value) {
+void update_matrix_db(unsigned char value)
+{
     MATRIX_DB = value | led_matrix_db;
 }
 
+//== LCD Functions =============================================================
+//TODO: Move to external lib
+// FROM: https://circuitdigest.com/microcontroller-projects/lcd-interfacing-with-8051-microcontroller-89s52
+//
+//#define display_port P2      //Data pins connected to port 2 on microcontroller
+//sbit rs = P3^2;  //RS pin connected to pin 2 of port 3
+//sbit rw = P3^3;  // RW pin connected to pin 3 of port 3
+//sbit e =  P3^4;  //E pin connected to pin 4 of port 3
+
+
+
+/**
+ * Function to send command instruction to LCD
+ * @param command
+ */
+void lcd_cmd(unsigned char command)
+{
+    LCD_DATA = command;
+    LCD_RS   = 0;
+    LCD_RW   = 0;
+    LCD_E    = 1;
+    ms_delay(1);
+    LCD_E    = 0;
+}
+
+/**
+ * Function to send display data to LCD
+ * @param disp_data
+ */
+void lcd_data(unsigned char disp_data)
+{
+    LCD_DATA = disp_data;
+    LCD_RS   = 1;
+    LCD_RW   = 0;
+    LCD_E    = 1;
+    ms_delay(1);
+    LCD_E    = 0;
+}
+
+/**
+ * Function to prepare the LCD  and get it ready
+ */
+void lcd_init(void)
+{
+    lcd_cmd(0x38);  // for using 2 lines and 5X7 matrix of LCD
+    ms_delay(10);
+    lcd_cmd(0x0F);  // turn display ON, cursor blinking
+    ms_delay(10);
+    lcd_cmd(0x01);  //clear screen
+    ms_delay(10);
+    lcd_cmd(0x81);  // bring cursor to position 1 of line 1
+    ms_delay(10);
+}
+
+/**
+ * Function for creating delay in milliseconds.
+ * @param time
+ */
+void ms_delay(unsigned int time) {
+    // Must calculate from CPU clock/cristal
+    //CPU_CLOCK
+    // Clock: 12MHz = 83.333ns
+    // Cycles per loop for = 12 ~= 999,96ms ~= 1us
+    unsigned i,j ;
+    for(i=0;i<time;i++)
+        for(j=0;j<1275;j++);            //TODO: Adjust to get 1ms
+
+}
 
 //== Tests =====================================================================
 // TODO: Make serial implementation
@@ -132,7 +202,8 @@ void updateMatrixDataB(unsigned char value) {
  * Setup CPU IO and Registers
  * @return void
  */
-void setup(void) {
+void setup(void)
+{
     IE  = 0;                            // Interrupt Enable: Disable all
     IP  = 0;                            // Interrupt Priority: Disable all
     PSW = 0;                            // Program Status World: Clear
@@ -151,21 +222,31 @@ void setup(void) {
     led_matrix_da = 0x00;               // Reset LED state
     led_matrix_db = 0x00;               // Reset LED state
     // Set LED Status ON
-    setMatrixStatus(LED_STATUS, true);
+    set_matrix_status(LED_STATUS, true);
     // Update Matrix Latch A
-    updateMatrixDataA(0x00);
+    update_matrix_da(0x00);
     // Update Matrix Latch A
-    updateMatrixDataB(0x00);
+    update_matrix_db(0x00);
+
 }
 
 /**
  * Main function call
  * @return int
  */
-int main(void) {
+int main(void)
+{
     setup();        // Setup IO and Registers
     NOP();
+    NOP();
 //    printf("Hello, World from C!");
+    bool state = false;
+    //for(;;) {
+        ms_delay(1000);
+        // Set LED Status ON
+        set_matrix_status(LED_STATUS, state);
+        state = ~state;
+    //}
     return 0;
 }
 

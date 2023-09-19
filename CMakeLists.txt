@@ -27,6 +27,7 @@ set(CMAKE_C_STANDARD 99)
 
 #add_compile_options(--std-c99)
 add_compile_options(-mmcs51)
+#add_compile_options(--debug)
 add_link_options(-mmcs51)
 #add_compile_options(-mstm8)
 #add_link_options(-mstm8)
