@@ -20,7 +20,7 @@ compilers:
 #define __STDC_NO_COMPLEX__ 1
 
 #define __SDCC_INT_LONG_REENT 1
-#define __SDCC_MODEL_MEDIUM 1
+#define __SDCC_MODEL_SMALL 1
 #define __SDCC_VERSION_MINOR 1
 #define __SDCC_VERSION_PATCH 0
 #define __SDCC_mcs51 1

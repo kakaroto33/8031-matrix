@@ -219,6 +219,7 @@ void setup(void)
     //   P3.5 - LCD_E   Buss
     //   P3.6 - WR#     Alternate
     //   P3.7 - RD#     Alternate
+
     led_matrix_da = 0x00;               // Reset LED state
     led_matrix_db = 0x00;               // Reset LED state
     // Set LED Status ON
@@ -242,11 +243,12 @@ int main(void)
 //    printf("Hello, World from C!");
     bool state = false;
     //for(;;) {
-        ms_delay(1000);
+        //ms_delay(1000);
         // Set LED Status ON
         set_matrix_status(LED_STATUS, state);
         state = ~state;
     //}
+
     return 0;
 }
 
