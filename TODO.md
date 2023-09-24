@@ -1,0 +1,32 @@
+
+- [X] Create updated base circuit design.
+- [X] Create wire wrap pin map.
+- [X] Optimize digital gates extra ports and extended access address.
+- [X] Test use AT28C64(EEPROM) in place of EPROM, to write programs and test on board.
+- [X] Create basic assemble program to test (STATUS LED'S).
+    - [X] Check use of emulators: Found on SDCC ucsim_51.exe, is very good.
+    - [X] Fixed basic testes, work only with as31.exe
+    - [X] Create SDCC version of this tests
+    - [ ] Fix flag/bit control over output matrix latch's
+    - [ ] Calculate delay for 1us or 1ms function using cristal clock with 11.1MHz
+- [ ] Add serial connection to board using modern USB UART (maybe as power source as well).
+- [ ] Write basic serial communication program, model to work as terminal.
+- [ ] Create serial upload routine to send binary program to test new programs.
+    - [ ] Need define how address mapping will work. Maybe define start program address constant in sources.
+    - [ ] Need define commands to check, erase ?, uploaded programs.
+    - [ ] Add support for multiple programs ?
+    - [ ] Create first command to check all I/O and RAM/EPROM/EEPROM, logic gates, latch's.
+- [ ] Need define hardware input for bard interaction, there reserved P3.2 interrupt, maybe just one rotatory encode is enough (button + left + right actions)
+    - [ ] Problem, there not enough I/O, we need add extra LATCH(74HC373) to free P1, and use Data Buss on the new LATCH (like others).
+- [ ] Create LCD driver and functions to interact.
+    - [ ] Create menu and options to control functions, using Encode + LCD interaction.
+    - [ ] We pause all program on Interrupt, and wait to release ?
+    - [ ] TODO: Define menu functions.
+- [ ] Start matrix integration, review all OLD matrix I/O, now we can test on the fly.
+    - [ ] Create scan lines checks.
+    - [ ] Check refresh speeds.
+    - [ ] Create text font library.
+    - [ ] Create display buffers and write methods.
+    - [ ] Create first texts.
+    - [ ] TODO: Define effects and animations.
+- [ ] Maybe: Add on serial

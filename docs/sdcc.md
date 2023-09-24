@@ -35,6 +35,13 @@ REf:
 
 - file:///C:/Program%20Files/SDCC/doc/sdccman.html/node104.html
 
-- http://mazsola.iit.uni-miskolc.hu/~drdani/embedded/s51/cmd.html
 
 
+Asm31: Assembler for 8051
+- https://www.pjrc.com/tech/8051/tools/as31-doc.html
+
+uCsim: 8051 Simulator for Intel Hex Files:
+- http://mazsola.iit.uni-miskolc.hu/~drdani/embedded/s51/
+
+CMake:  
+ - https://cmake.org/cmake/help/latest/index.html

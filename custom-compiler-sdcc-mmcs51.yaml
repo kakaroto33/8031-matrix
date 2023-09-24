@@ -19,18 +19,27 @@ compilers:
 #define __STDC__ 1
 #define __STDC_NO_COMPLEX__ 1
 
-#define __SDCC_INT_LONG_REENT 1
-#define __SDCC_MODEL_SMALL 1
-#define __SDCC_VERSION_MINOR 1
-#define __SDCC_VERSION_PATCH 0
 #define __SDCC_mcs51 1
-#define __SDCC_FLOAT_REENT 1
-#define __SDCC_VERSION_MAJOR 4
-#define __SDCC 4_3_0
+#define __SDCC_MODEL_SMALL 1
+
 #define __SDCC_CHAR_UNSIGNED 1
 #define __SDCC_STACK_AUTO 1
 
+#define __SDCC_VERSION_MINOR 1
+#define __SDCC_VERSION_PATCH 0
+#define __SDCC_VERSION_MAJOR 4
+#define __SDCC 4_3_0
+
+#define __at(n)
+
 "
+
+# https://sourceforge.net/p/predef/wiki/Standards/
+#define __STDC_VERSION__ 201112L
+#define	__STDC_VERSION__ = 199901L
+
+#define __SDCC_INT_LONG_REENT 1
+#define __SDCC_FLOAT_REENT 1
 
 # define __interrupt(n)
 # define __at(n)
