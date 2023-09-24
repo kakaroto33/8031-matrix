@@ -28,8 +28,8 @@
 .equ	baud_save, 0x78		;save baud for warm boot, 4 bytes
 
 
-.equ    matrix_da_address, 0xa000   ; Matrix A
-.equ    matrix_db_address, 0xc000   ; Matrix B
+.equ    matrix_da_address, 0xc000   ; Matrix A  WR# + A15 + A14 + A13#
+.equ    matrix_db_address, 0xa000   ; Matrix B  WR# + A15 + A14# + A13
 
 ; Boot sequence
 	.org	base		; start on base address
@@ -47,19 +47,38 @@
 
 main:
 	.org	main_address
-	mov	a, 0x04
+	mov	r7, #0b00001000                 ; LED_STATUS = D3
 	acall	set_matrix_a
 	acall	delay
-	mov	a, 0x80
+
+	mov	r7, #0x80                       ; LED_USER = D8
 	acall	set_matrix_a
 	acall	delay
-	mov	a, 0x40
+
+	mov r7, #0x00
+    acall	set_matrix_a                ; Clear
+
+	mov	r7, #0x08                       ; LED_MATRIX = D3
 	acall	set_matrix_b
     acall	delay
-    clr a
-    acall	set_matrix_a
+
+    mov r7, #0x00
     acall	set_matrix_b
 	acall	delay
+
+	mov	r7, #0x08                       ; LED_STATUS = D3
+    acall	set_matrix_a
+    acall	delay
+    mov	r7, #0x88                       ; LED_USER = D8
+    acall	set_matrix_a
+    acall	delay
+    mov	r7, #0x08                       ; LED_MATRIX = D3
+    acall	set_matrix_b
+    acall	delay
+    mov r7, #0x00
+    acall	set_matrix_a
+    acall	set_matrix_b
+    acall	delay
 
 	ljmp    main_address
 
@@ -82,7 +101,7 @@ poweron:
 	mov	p2, a           ; 0xff  Port 2: All alternate function Address A8-A15
 	clr	a
 	mov	p1, a           ; 0x00  Port 1: We use as LCD data bus
-	mov a, 0xc3         ; 0b11000011
+	mov a, #0xc3         ; 0b11000011
 	mov	p3, a           ; 0xc3  Port 3: We use as mixed function
 
     ;//   P3.0 - RxD     Alternate
@@ -94,7 +113,7 @@ poweron:
     ;//   P3.6 - WR#     Alternate
     ;//   P3.7 - RD#     Alternate
 
-    clr	a
+    mov r7, #0x00
   	acall	set_matrix_a    ; Clear latch matrix a
   	acall	set_matrix_b    ; Clear latch matrix b
 
@@ -103,7 +122,7 @@ poweron:
 
 	;delay for a number of ms (specified by acc)
 delay:
-	mov	r0, a
+	mov	r0, #200
 dly2:	mov	r1, #230		;#230
 dly3:	nop
 	nop
@@ -118,11 +137,13 @@ dly3:	nop
 
 set_matrix_a:
 	mov	  dptr, #matrix_da_address
+	mov   a, r7
 	movx  @dptr, a
 	ret
 
 set_matrix_b:
-	mov	  dptr, #matrix_db_address
+    mov	  dptr, #matrix_db_address
+    mov   a, r7
 	movx  @dptr, a
 	ret
 

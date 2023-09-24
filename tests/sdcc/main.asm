@@ -9,6 +9,12 @@
 ; Public variables in this module
 ;--------------------------------------------------------
 	.globl _set_matrix_status_PARM_2
+	.globl _main
+	.globl _setup
+	.globl _ms_delay
+	.globl _set_matrix_status
+	.globl _update_matrix_db
+	.globl _update_matrix_da
 	.globl _CY
 	.globl _AC
 	.globl _F0
@@ -109,15 +115,6 @@
 	.globl _MATRIX_DA
 	.globl _led_matrix_db
 	.globl _led_matrix_da
-	.globl _set_matrix_status
-	.globl _update_matrix_da
-	.globl _update_matrix_db
-	.globl _lcd_cmd
-	.globl _lcd_data
-	.globl _lcd_init
-	.globl _ms_delay
-	.globl _setup
-	.globl _main
 ;--------------------------------------------------------
 ; special function registers
 ;--------------------------------------------------------
@@ -241,10 +238,10 @@ _led_matrix_db::
 ; overlayable items in internal ram
 ;--------------------------------------------------------
 	.area	OSEG    (OVR,DATA)
+	.area	OSEG    (OVR,DATA)
+	.area	OSEG    (OVR,DATA)
 _set_matrix_status_PARM_2:
 	.ds 1
-	.area	OSEG    (OVR,DATA)
-	.area	OSEG    (OVR,DATA)
 	.area	OSEG    (OVR,DATA)
 ;--------------------------------------------------------
 ; Stack segment in internal ram
@@ -313,9 +310,11 @@ __interrupt_vect:
 	.globl __mcs51_genXINIT
 	.globl __mcs51_genXRAMCLEAR
 	.globl __mcs51_genRAMCLEAR
-;	main.c:64: unsigned char led_matrix_da = 0x00;     // 8 Bytes: Keep LED state on latch MATRIX_DA
+;	../../main.c:74: unsigned char led_matrix_da = 0x00;     // 8 Bytes: Keep LED state on latch MATRIX_DA
+;	genAssign
 	mov	_led_matrix_da,#0x00
-;	main.c:65: unsigned char led_matrix_db = 0x00;     // 8 Bytes: Keep LED state on latch MATRIX_DB
+;	../../main.c:75: unsigned char led_matrix_db = 0x00;     // 8 Bytes: Keep LED state on latch MATRIX_DB
+;	genAssign
 	mov	_led_matrix_db,#0x00
 	.area GSFINAL (CODE)
 	ljmp	__sdcc_program_startup
@@ -332,16 +331,15 @@ __sdcc_program_startup:
 ;--------------------------------------------------------
 	.area CSEG    (CODE)
 ;------------------------------------------------------------
-;Allocation info for local variables in function 'set_matrix_status'
+;Allocation info for local variables in function 'update_matrix_da'
 ;------------------------------------------------------------
-;state                     Allocated with name '_set_matrix_status_PARM_2'
-;led                       Allocated to registers r6 
+;value                     Allocated to registers r7 
 ;------------------------------------------------------------
-;	main.c:83: void set_matrix_status(unsigned char led, bool state)
+;	../../main.c:92: void update_matrix_da(unsigned char value)
 ;	-----------------------------------------
-;	 function set_matrix_status
+;	 function update_matrix_da
 ;	-----------------------------------------
-_set_matrix_status:
+_update_matrix_da:
 	ar7 = 0x07
 	ar6 = 0x06
 	ar5 = 0x05
@@ -350,167 +348,159 @@ _set_matrix_status:
 	ar2 = 0x02
 	ar1 = 0x01
 	ar0 = 0x00
-;	main.c:86: if (led & 0x01) {
-	mov	a,dpl
-	mov	r7,a
-	jnb	acc.0,00108$
-;	main.c:87: led = led & 0xfe;                                   // Set bit 0 to 0
-	mov	a,#0xfe
-	anl	a,r7
-	mov	r6,a
-;	main.c:88: if (state) {
-	mov	a,_set_matrix_status_PARM_2
-	jz	00102$
-;	main.c:89: led_matrix_db = led_matrix_db | led;            // To enable a bit, use just OR
-	mov	a,r6
-	orl	_led_matrix_db,a
-	ret
-00102$:
-;	main.c:91: led_matrix_db = led_matrix_db | ~led;           // To disable a bit, use AND with complement bits (inverted)
-	mov	a,r6
-	cpl	a
-	orl	_led_matrix_db,a
-	ret
-00108$:
-;	main.c:94: if (state) {
-	mov	a,_set_matrix_status_PARM_2
-	jz	00105$
-;	main.c:95: led_matrix_da = led_matrix_da | led;            // To enable a bit, use just OR
-	mov	a,r7
-	orl	_led_matrix_da,a
-	ret
-00105$:
-;	main.c:97: led_matrix_da = led_matrix_da | ~led;           // To disable a bit, use AND with complement bits (inverted)
-	mov	a,r7
-	cpl	a
-	orl	_led_matrix_da,a
-;	main.c:100: }
-	ret
-;------------------------------------------------------------
-;Allocation info for local variables in function 'update_matrix_da'
-;------------------------------------------------------------
-;value                     Allocated to registers r7 
-;------------------------------------------------------------
-;	main.c:106: void update_matrix_da(unsigned char value)
-;	-----------------------------------------
-;	 function update_matrix_da
-;	-----------------------------------------
-_update_matrix_da:
+;	genReceive
 	mov	r7,dpl
-;	main.c:108: MATRIX_DA = value | led_matrix_da;
+;	../../main.c:94: MATRIX_DA = value | led_matrix_da;
+;	genOr
 	mov	dptr,#_MATRIX_DA
 	mov	a,_led_matrix_da
 	orl	a,r7
 	movx	@dptr,a
-;	main.c:109: }
+;	Peephole 500	removed redundant label 00101$
+;	../../main.c:95: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'update_matrix_db'
 ;------------------------------------------------------------
 ;value                     Allocated to registers r7 
 ;------------------------------------------------------------
-;	main.c:115: void update_matrix_db(unsigned char value)
+;	../../main.c:101: void update_matrix_db(unsigned char value)
 ;	-----------------------------------------
 ;	 function update_matrix_db
 ;	-----------------------------------------
 _update_matrix_db:
+;	genReceive
 	mov	r7,dpl
-;	main.c:117: MATRIX_DB = value | led_matrix_db;
+;	../../main.c:103: MATRIX_DB = value | led_matrix_db;
+;	genOr
 	mov	dptr,#_MATRIX_DB
 	mov	a,_led_matrix_db
 	orl	a,r7
 	movx	@dptr,a
-;	main.c:118: }
+;	Peephole 500	removed redundant label 00101$
+;	../../main.c:104: }
 	ret
 ;------------------------------------------------------------
-;Allocation info for local variables in function 'lcd_cmd'
+;Allocation info for local variables in function 'set_matrix_status'
 ;------------------------------------------------------------
-;command                   Allocated to registers 
+;state                     Allocated with name '_set_matrix_status_PARM_2'
+;led                       Allocated to registers r7 
+;led_byte                  Allocated to registers r6 
 ;------------------------------------------------------------
-;	main.c:135: void lcd_cmd(unsigned char command)
+;	../../main.c:112: void set_matrix_status(unsigned char led, bool state)
 ;	-----------------------------------------
-;	 function lcd_cmd
+;	 function set_matrix_status
 ;	-----------------------------------------
-_lcd_cmd:
-	mov	_P1,dpl
-;	main.c:138: LCD_RS   = 0;
-;	assignBit
-	clr	_P3_3
-;	main.c:139: LCD_RW   = 0;
-;	assignBit
-	clr	_P3_4
-;	main.c:140: LCD_E    = 1;
-;	assignBit
-	setb	_P3_5
-;	main.c:141: ms_delay(1);
-	mov	dptr,#0x0001
-	lcall	_ms_delay
-;	main.c:142: LCD_E    = 0;
-;	assignBit
-	clr	_P3_5
-;	main.c:143: }
+_set_matrix_status:
+;	genReceive
+	mov	r7,dpl
+;	../../main.c:114: unsigned char led_byte = 0;
+;	genAssign
+	mov	r6,#0x00
+;	../../main.c:116: if      (led == LED_STATUS) led_byte = LED_BIT_STATUS;
+;	genCmpEq
+;	gencjneshort
+;	Peephole 112.b	changed ljmp to sjmp
+;	Peephole 198.b	optimized misc jump sequence
+	cjne	r7,#0x01,00107$
+;	Peephole 200.b	removed redundant sjmp
+;	Peephole 500	removed redundant label 00144$
+;	Peephole 500	removed redundant label 00145$
+;	genAssign
+	mov	r6,#0x08
+;	Peephole 112.b	changed ljmp to sjmp
+	sjmp	00108$
+00107$:
+;	../../main.c:117: else if (led == LED_USER)   led_byte = LED_BIT_USER;
+;	genCmpEq
+;	gencjneshort
+;	Peephole 112.b	changed ljmp to sjmp
+;	Peephole 198.b	optimized misc jump sequence
+	cjne	r7,#0x02,00104$
+;	Peephole 200.b	removed redundant sjmp
+;	Peephole 500	removed redundant label 00146$
+;	Peephole 500	removed redundant label 00147$
+;	genAssign
+	mov	r6,#0x80
+;	Peephole 112.b	changed ljmp to sjmp
+	sjmp	00108$
+00104$:
+;	../../main.c:118: else if (led == LED_MATRIX) led_byte = LED_BIT_MATRIX;
+;	genCmpEq
+;	gencjneshort
+;	Peephole 112.b	changed ljmp to sjmp
+;	Peephole 198.b	optimized misc jump sequence
+	cjne	r7,#0x10,00108$
+;	Peephole 200.b	removed redundant sjmp
+;	Peephole 500	removed redundant label 00148$
+;	Peephole 500	removed redundant label 00149$
+;	genAssign
+	mov	r6,#0x08
+00108$:
+;	../../main.c:120: if (state == false) {
+;	genIfx
+	mov	a,_set_matrix_status_PARM_2
+;	genIfxJump
+;	Peephole 108.b	removed ljmp by inverse jump logic
+	jnz	00116$
+;	Peephole 500	removed redundant label 00150$
+;	../../main.c:121: if (led == LED_BIT_MATRIX) {                        // LED_BIT_MATRIX is on led_matrix_db
+;	genCmpEq
+;	gencjneshort
+;	Peephole 112.b	changed ljmp to sjmp
+;	Peephole 198.b	optimized misc jump sequence
+	cjne	r7,#0x08,00110$
+;	Peephole 200.b	removed redundant sjmp
+;	Peephole 500	removed redundant label 00151$
+;	Peephole 500	removed redundant label 00152$
+;	../../main.c:122: led_matrix_db = led_matrix_db & ~led_byte;      // To disable a bit, use AND with complement bits (inverted)
+;	genCpl
+	mov	a,r6
+	cpl	a
+;	genAnd
+;	Peephole 302	mov r5,a removed
+;	Peephole 105.a	removed redundant mov
+	anl	_led_matrix_db,a
+;	Peephole 112.b	changed ljmp to sjmp
+;	Peephole 251.b	replaced sjmp 00118$ to ret with ret
 	ret
-;------------------------------------------------------------
-;Allocation info for local variables in function 'lcd_data'
-;------------------------------------------------------------
-;disp_data                 Allocated to registers 
-;------------------------------------------------------------
-;	main.c:149: void lcd_data(unsigned char disp_data)
-;	-----------------------------------------
-;	 function lcd_data
-;	-----------------------------------------
-_lcd_data:
-	mov	_P1,dpl
-;	main.c:152: LCD_RS   = 1;
-;	assignBit
-	setb	_P3_3
-;	main.c:153: LCD_RW   = 0;
-;	assignBit
-	clr	_P3_4
-;	main.c:154: LCD_E    = 1;
-;	assignBit
-	setb	_P3_5
-;	main.c:155: ms_delay(1);
-	mov	dptr,#0x0001
-	lcall	_ms_delay
-;	main.c:156: LCD_E    = 0;
-;	assignBit
-	clr	_P3_5
-;	main.c:157: }
+00110$:
+;	../../main.c:124: led_matrix_da = led_matrix_da & ~led_byte;      // To disable a bit, use AND with complement bits (inverted)
+;	genCpl
+	mov	a,r6
+	cpl	a
+;	genAnd
+;	Peephole 302	mov r5,a removed
+;	Peephole 105.a	removed redundant mov
+	anl	_led_matrix_da,a
+;	Peephole 112.b	changed ljmp to sjmp
+;	Peephole 251.b	replaced sjmp 00118$ to ret with ret
 	ret
-;------------------------------------------------------------
-;Allocation info for local variables in function 'lcd_init'
-;------------------------------------------------------------
-;	main.c:162: void lcd_init(void)
-;	-----------------------------------------
-;	 function lcd_init
-;	-----------------------------------------
-_lcd_init:
-;	main.c:164: lcd_cmd(0x38);  // for using 2 lines and 5X7 matrix of LCD
-	mov	dpl,#0x38
-	lcall	_lcd_cmd
-;	main.c:165: ms_delay(10);
-	mov	dptr,#0x000a
-	lcall	_ms_delay
-;	main.c:166: lcd_cmd(0x0F);  // turn display ON, cursor blinking
-	mov	dpl,#0x0f
-	lcall	_lcd_cmd
-;	main.c:167: ms_delay(10);
-	mov	dptr,#0x000a
-	lcall	_ms_delay
-;	main.c:168: lcd_cmd(0x01);  //clear screen
-	mov	dpl,#0x01
-	lcall	_lcd_cmd
-;	main.c:169: ms_delay(10);
-	mov	dptr,#0x000a
-	lcall	_ms_delay
-;	main.c:170: lcd_cmd(0x81);  // bring cursor to position 1 of line 1
-	mov	dpl,#0x81
-	lcall	_lcd_cmd
-;	main.c:171: ms_delay(10);
-	mov	dptr,#0x000a
-;	main.c:172: }
-	ljmp	_ms_delay
+00116$:
+;	../../main.c:127: if (led == LED_BIT_MATRIX) {                        // LED_BIT_MATRIX is on led_matrix_db
+;	genCmpEq
+;	gencjneshort
+;	Peephole 112.b	changed ljmp to sjmp
+;	Peephole 198.b	optimized misc jump sequence
+	cjne	r7,#0x08,00113$
+;	Peephole 200.b	removed redundant sjmp
+;	Peephole 500	removed redundant label 00153$
+;	Peephole 500	removed redundant label 00154$
+;	../../main.c:128: led_matrix_db = led_matrix_db | led_byte;       //  To enable a bit, use just OR
+;	genOr
+	mov	a,r6
+	orl	_led_matrix_db,a
+;	Peephole 112.b	changed ljmp to sjmp
+;	Peephole 251.b	replaced sjmp 00118$ to ret with ret
+	ret
+00113$:
+;	../../main.c:130: led_matrix_da = led_matrix_da | led_byte;       // To enable a bit, use just OR
+;	genOr
+	mov	a,r6
+	orl	_led_matrix_da,a
+;	Peephole 500	removed redundant label 00118$
+;	../../main.c:133: }
+	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'ms_delay'
 ;------------------------------------------------------------
@@ -518,103 +508,154 @@ _lcd_init:
 ;i                         Allocated to registers r4 r5 
 ;j                         Allocated to registers r2 r3 
 ;------------------------------------------------------------
-;	main.c:178: void ms_delay(unsigned int time) {
+;	../../main.c:195: void ms_delay(unsigned int time) {
 ;	-----------------------------------------
 ;	 function ms_delay
 ;	-----------------------------------------
 _ms_delay:
+;	genReceive
 	mov	r6,dpl
 	mov	r7,dph
-;	main.c:184: for(i=0;i<time;i++)
+;	../../main.c:201: for(i=0;i<time;i++)
+;	genAssign
 	mov	r4,#0x00
 	mov	r5,#0x00
 00107$:
+;	genCmpLt
+;	genCmp
 	clr	c
 	mov	a,r4
 	subb	a,r6
 	mov	a,r5
 	subb	a,r7
+;	genIfxJump
+;	Peephole 108.a	removed ljmp by inverse jump logic
 	jnc	00109$
-;	main.c:185: for(j=0;j<1275;j++);            //TODO: Adjust to get 1ms
+;	Peephole 500	removed redundant label 00129$
+;	../../main.c:202: for(j=0;j<1275;j++);            //TODO: Adjust to get 1ms
+;	genAssign
 	mov	r2,#0xfb
 	mov	r3,#0x04
 00105$:
+;	genMinus
+;	genMinusDec
 	dec	r2
 	cjne	r2,#0xff,00130$
 	dec	r3
 00130$:
+;	genIfx
 	mov	a,r2
 	orl	a,r3
+;	genIfxJump
+;	Peephole 108.b	removed ljmp by inverse jump logic
 	jnz	00105$
-;	main.c:184: for(i=0;i<time;i++)
+;	Peephole 500	removed redundant label 00131$
+;	../../main.c:201: for(i=0;i<time;i++)
+;	genPlus
+;	genPlusIncr
 	inc	r4
+;	Peephole 112.b	changed ljmp to sjmp
+;	Peephole 243	avoided branch to sjmp
 	cjne	r4,#0x00,00107$
 	inc	r5
+;	Peephole 500	removed redundant label 00132$
 	sjmp	00107$
 00109$:
-;	main.c:187: }
+;	../../main.c:204: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'setup'
 ;------------------------------------------------------------
-;	main.c:205: void setup(void)
+;	../../main.c:222: void setup(void)
 ;	-----------------------------------------
 ;	 function setup
 ;	-----------------------------------------
 _setup:
-;	main.c:207: IE  = 0;                            // Interrupt Enable: Disable all
+;	../../main.c:224: IE  = 0;                            // Interrupt Enable: Disable all
+;	genAssign
 	mov	_IE,#0x00
-;	main.c:208: IP  = 0;                            // Interrupt Priority: Disable all
+;	../../main.c:225: IP  = 0;                            // Interrupt Priority: Disable all
+;	genAssign
 	mov	_IP,#0x00
-;	main.c:209: PSW = 0;                            // Program Status World: Clear
+;	../../main.c:226: PSW = 0;                            // Program Status World: Clear
+;	genAssign
 	mov	_PSW,#0x00
-;	main.c:210: P0  = 0xff;                         // Port 0: All alternate function Data/Address A0-A7
+;	../../main.c:227: P0  = 0xFF;                         // Port 0: All alternate function Data/Address A0-A7
+;	genAssign
 	mov	_P0,#0xff
-;	main.c:211: P1  = 0x00;                         // Port 1: We use as LCD data bus
+;	../../main.c:228: P1  = 0x00;                         // Port 1: We use as LCD data bus
+;	genAssign
 	mov	_P1,#0x00
-;	main.c:212: P2  = 0xff;                         // Port 2: All alternate function Address A8-A15
+;	../../main.c:229: P2  = 0xFF;                         // Port 2: All alternate function Address A8-A15
+;	genAssign
 	mov	_P2,#0xff
-;	main.c:213: P3  = 0b11000011;                   // Port 3: We use as mixed function
+;	../../main.c:230: P3  = 0xC3;                         // Port 3: We use as mixed function: 0b11000011 = 0xC3;
+;	genAssign
 	mov	_P3,#0xc3
-;	main.c:223: led_matrix_da = 0x00;               // Reset LED state
-	mov	_led_matrix_da,#0x00
-;	main.c:224: led_matrix_db = 0x00;               // Reset LED state
-	mov	_led_matrix_db,#0x00
-;	main.c:226: set_matrix_status(LED_STATUS, true);
-	mov	_set_matrix_status_PARM_2,#0x01
-	mov	dpl,#0x08
-	lcall	_set_matrix_status
-;	main.c:228: update_matrix_da(0x00);
-	mov	dpl,#0x00
-	lcall	_update_matrix_da
-;	main.c:230: update_matrix_db(0x00);
-	mov	dpl,#0x00
-;	main.c:232: }
-	ljmp	_update_matrix_db
+;	../../main.c:248: MATRIX_DA = 0x00;
+;	genAssign
+	mov	dptr,#_MATRIX_DA
+;	Peephole 181	changed mov to clr
+	clr	a
+	movx	@dptr,a
+;	../../main.c:249: MATRIX_DB = 0x00;
+;	genAssign
+	mov	dptr,#_MATRIX_DB
+;	genFromRTrack acc==0x00
+	movx	@dptr,a
+;	Peephole 500	removed redundant label 00101$
+;	../../main.c:251: }
+	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'main'
 ;------------------------------------------------------------
 ;state                     Allocated to registers 
 ;------------------------------------------------------------
-;	main.c:238: int main(void)
+;	../../main.c:257: int main(void)
 ;	-----------------------------------------
 ;	 function main
 ;	-----------------------------------------
 _main:
-;	main.c:240: setup();        // Setup IO and Registers
+;	../../main.c:259: setup();        // Setup IO and Registers
+;	genCall
 	lcall	_setup
-;	main.c:241: NOP();
-	nop 
-;	main.c:242: NOP();
-	nop 
-;	main.c:248: set_matrix_status(LED_STATUS, state);
-	mov	_set_matrix_status_PARM_2,#0x00
-	mov	dpl,#0x08
-	lcall	_set_matrix_status
-;	main.c:252: return 0;
-	mov	dptr,#0x0000
-;	main.c:253: }
-	ret
+;	../../main.c:263: bool state = false;
+00102$:
+;	../../main.c:266: MATRIX_DA = 0x08;
+;	genAssign
+	mov	dptr,#_MATRIX_DA
+	mov	a,#0x08
+	movx	@dptr,a
+;	../../main.c:267: ms_delay(10);
+;	genCall
+;	Peephole 182.b	used 16 bit load of dptr
+	mov	dptr,#0x000a
+	lcall	_ms_delay
+;	../../main.c:268: MATRIX_DA = 0x88;
+;	genAssign
+	mov	dptr,#_MATRIX_DA
+	mov	a,#0x88
+	movx	@dptr,a
+;	../../main.c:269: ms_delay(10);
+;	genCall
+;	Peephole 182.b	used 16 bit load of dptr
+	mov	dptr,#0x000a
+	lcall	_ms_delay
+;	../../main.c:270: MATRIX_DA = 0x00;
+;	genAssign
+	mov	dptr,#_MATRIX_DA
+;	Peephole 181	changed mov to clr
+	clr	a
+	movx	@dptr,a
+;	../../main.c:271: ms_delay(10);
+;	genCall
+;	Peephole 182.b	used 16 bit load of dptr
+	mov	dptr,#0x000a
+	lcall	_ms_delay
+;	Peephole 112.b	changed ljmp to sjmp
+;	../../main.c:276: }
+	sjmp	00102$
+;	Peephole 259.a	removed redundant label 00104$ and ret
 	.area CSEG    (CODE)
 	.area CONST   (CODE)
 	.area XINIT   (CODE)
