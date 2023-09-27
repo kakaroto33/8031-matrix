@@ -10,7 +10,7 @@
 #include <mcs51/8051.h>
 #include <stdbool.h>
 
-//== Memory Map and Ports ======================================================
+//== MEMORY MAP ================================================================
 
 // EPROM: Will be used 16Kb or 8Kb EPROM (UV Erasable like CI 27128)
 //        8031 don't have programmable internal memory, so, on boot will go directly on external program memory,
@@ -42,40 +42,41 @@
 // RDPSEN#    = (PSEN# AND RD#)         // Its AND gate, whenever PSEN:LOW or RD:LOW = RDPSEN:LOW
 // CS_EEPROM# = (A14 NAND ¬A15)         // Its NAND gate, where A15 has NOT gate, A14:HIGH and A15:LOW = CS_EPROM:LOW
 
-//== LCD Ports =================================================================
-// TODO: This will change, P1 will have new latch
-#define LCD_DATA  P1                    // All port P1 is connected to data LCD (DB0-DB7)
-#define LCD_RS    P3_3                  // LCD Register Select: Data(High)/Instruction(LOW)
-#define LCD_RW    P3_4                  // LCD Read(HIGH)/Write(LOW)
-#define LCD_E     P3_5                  // LCD Enable
-
-//== Matrix Latches ============================================================
+//== DATA LATCHES ============================================================
 // Matrix latches is accessible in high address as RAM, need Write operations (WR#)
-// Matrix A  WR# + A15 + A14 + A13#
-// MATRIX_DA 0xC000                     // (A15 NAND ¬WR#) NOR A13#: When A15:HIGH, A14:HIGH, A13:LOW , WR:LOW = MATRIX_DA:HIGH
-// MATRIX_DB 0xA000                     // (A15 NAND ¬WR#) NOR A14#: When A15:HIGH, A14:LOW , A13:HIGH, WR:LOW = MATRIX_DB:HIGH
-//__sfr16 __at (0xA000) MATRIX_DA;
+// These port controls is all on A15:HIGH or address above 0x8000
+                                                            // WR_A15 = (A15 NAND ¬WR#)
+__xdata __at (0xB000) unsigned char DATA_LATCH_MATRIX;      // WR_A15:LOW, A14:LOW , A13:HIGH, A12:HIGH = MATRIX_DATA:HIGH
+__xdata __at (0xD000) unsigned char DATA_LATCH_LED;         // WR_A15:LOW, A14:HIGH, A13:LOW , A12:HIGH = LED_DATA:HIGH
+__xdata __at (0xE000) unsigned char DATA_LATCH_LCD;         // WR_A15:LOW, A14:HIGH, A13:HIGH, A12:LOW  = LCD_DATA:HIGH
 
-__xdata __at (0xC000) unsigned char MATRIX_DA;
-__xdata __at (0xA000) unsigned char MATRIX_DB;
+//== LCD PORTS =================================================================
+// Data will com from latch
+#define LCD_RS    P1_0                  // LCD Register Select: Data(High)/Instruction(LOW)
+#define LCD_RW    P1_1                  // LCD Read(HIGH)/Write(LOW)
+#define LCD_E     P1_2                  // LCD Enable
 
-//== Status Led's ==============================================================
-// There 3 LED's on matrix latches, where user can change state
-// Define identifications
-#define LED_STATUS 0x01                 // Data value to send to MATRIX_DA
-#define LED_USER   0x02                 // Data value to send to MATRIX_DA
-#define LED_MATRIX 0x10                 // Data value to send to MATRIX_DB
+//== INPUT: ROTATORY ENCODER ===================================================
+#define ROT_CLOCK   P3_0                // ROTATORY: [INTERRUPT 0] Clock
+#define ROT_SWITCH  P3_1                // ROTATORY: [INTERRUPT 1] Switch
+#define ROT_DATA    P3_2                // ROTATORY: Data
 
-// Define bit to enable
-#define LED_BIT_STATUS 0x08             // Data value to send to MATRIX_DA
-#define LED_BIT_USER   0x80             // Data value to send to MATRIX_DA
-#define LED_BIT_MATRIX 0x08             // Data value to send to MATRIX_DB
-                                        // on function setMatrixStatus()
-// Global Vars
-unsigned char led_matrix_da = 0x00;     // 8 Bytes: Keep LED state on latch MATRIX_DA
-unsigned char led_matrix_db = 0x00;     // 8 Bytes: Keep LED state on latch MATRIX_DB
+//== STATUS LED'S ==============================================================
+// There 7 LED's on leds on LED_DATA latch
 
-//== Special functions =========================================================
+#define LED_MATRIX      0x01            // [0b00000001] YELLOW: Matrix routine is running
+#define LED_ENC_INPUT   0x02            // [0b00000010] YELLOW: Encode input (clock or switch)
+#define LED_TERMINAL    0x04            // [0b00000100] YELLOW: Serial terminal communication
+#define LED_WAIT_PROG   0x08            // [0b00001000] YELLOW: Waiting/Write program from serial.
+#define LED_STATUS      0x10            // [0b00010000] GREEN: Board boot status OK
+#define LED_USER_PROG   0x20            // [0b00100000] GREEN: Started user program
+#define LED_INTERRUPT   0x40            // [0b01000000] RED: On any interrupt started
+//                      0x80            // RED: Last LED is connected to reset button.
+//== GLOBAL VARIABLES ==========================================================
+
+unsigned char led_status_map = 0x00;    // 8 Bytes: Keep LED states to update LED_DATA
+
+//== SPECIAL FUNCTIONS =========================================================
 // This a single Assemble Instruction NOP
 // On 8051 Family this will take 12 clock cycles.
 #define NOP() \
@@ -85,24 +86,23 @@ unsigned char led_matrix_db = 0x00;     // 8 Bytes: Keep LED state on latch MATR
 
 //== Matrix Functions ==========================================================
 
-
-/**
- * Update Matrix A and Led States
- * @param value
- */
-void update_matrix_da(unsigned char value)
-{
-    MATRIX_DA = value | led_matrix_da;
-}
-
-/**
- * Update Matrix B and Led States
- * @param value
- */
-void update_matrix_db(unsigned char value)
-{
-    MATRIX_DB = value | led_matrix_db;
-}
+///**
+// * Update Matrix A and Led States
+// * @param value
+// */
+//void update_matrix_da(unsigned char value)
+//{
+//    MATRIX_DA = value | led_matrix_da;
+//}
+//
+///**
+// * Update Matrix B and Led States
+// * @param value
+// */
+//void update_matrix_db(unsigned char value)
+//{
+//    MATRIX_DB = value | led_matrix_db;
+//}
 
 /**
  *
@@ -112,28 +112,13 @@ void update_matrix_db(unsigned char value)
  */
 void set_led_status(unsigned char led, bool state)
 {
-    unsigned char led_byte = 0;
-
-    if      (led == LED_STATUS) led_byte = LED_BIT_STATUS;
-    else if (led == LED_USER)   led_byte = LED_BIT_USER;
-    else if (led == LED_MATRIX) led_byte = LED_BIT_MATRIX;
-
-    // TODO: Recreate using LATCH last data, is better than overwrite
     if (state == false) {
-        if (led == LED_BIT_MATRIX) {                        // LED_BIT_MATRIX is on led_matrix_db
-            MATRIX_DB = led_matrix_db & ~led_byte;      // To disable a bit, use AND with complement bits (inverted)
-        } else {
-            MATRIX_DA = led_matrix_da & ~led_byte;      // To disable a bit, use AND with complement bits (inverted)
-        }
+        led_status_map &= ~led;         // To disable a bit, use AND with complement bits (inverted)
     } else {
-        if (led == LED_BIT_MATRIX) {                        // LED_BIT_MATRIX is on led_matrix_db
-            MATRIX_DB = led_matrix_db | led_byte;       //  To enable a bit, use just OR
-        } else {
-            MATRIX_DA = led_matrix_da | led_byte;       // To enable a bit, use just OR
-        }
+        led_status_map |= led;          //  To enable a bit, use just OR
     }
+    DATA_LATCH_LED = led_status_map;
 }
-
 
 //== LCD Functions =============================================================
 //TODO: Move to external lib
@@ -247,8 +232,9 @@ void setup(void)
 //    update_matrix_da(0x00);
 //    // Update Matrix Latch A
 //    update_matrix_db(0x00);
-    MATRIX_DA = 0x00;
-    MATRIX_DB = 0x00;
+    DATA_LATCH_MATRIX = 0x00;
+    DATA_LATCH_LED    = 0x00;
+    DATA_LATCH_LCD    = 0x00;
 
 }
 
@@ -273,17 +259,33 @@ int main(void)
 //        ms_delay(100);
 //        state = ~state;
 
-        MATRIX_DA = 0x08;
-        ms_delay(100);
-        MATRIX_DA = 0x88;
-        ms_delay(100);
-        MATRIX_DB = 0x08;
-        ms_delay(100);
-        MATRIX_DA = 0x00;
-        MATRIX_DB = 0x00;
-        ms_delay(100);
+//        MATRIX_DA = 0x08;
+//        ms_delay(100);
+//        MATRIX_DA = 0x88;
+//        ms_delay(100);
+//        MATRIX_DB = 0x08;
+//        ms_delay(100);
+//        MATRIX_DA = 0x00;
+//        MATRIX_DB = 0x00;
+//        ms_delay(100);
 //        set_matrix_status(LED_STATUS, state);
 //        state = ~state;
+        set_led_status(LED_MATRIX, true);
+        ms_delay(100);
+        set_led_status(LED_ENC_INPUT, true);
+        ms_delay(100);
+        set_led_status(LED_TERMINAL, true);
+        ms_delay(100);
+        set_led_status(LED_WAIT_PROG, true);
+        ms_delay(100);
+        set_led_status(LED_STATUS, true);
+        ms_delay(100);
+        set_led_status(LED_USER_PROG, true);
+        ms_delay(100);
+        set_led_status(LED_INTERRUPT, true);
+
+        ms_delay(100);
+        DATA_LATCH_LED = 0x00;
     }
     // return 0;
 }
