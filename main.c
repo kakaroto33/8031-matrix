@@ -50,16 +50,29 @@ __xdata __at (0xB000) unsigned char DATA_LATCH_MATRIX;      // WR_A15:LOW, A14:L
 __xdata __at (0xD000) unsigned char DATA_LATCH_LED;         // WR_A15:LOW, A14:HIGH, A13:LOW , A12:HIGH = LED_DATA:HIGH
 __xdata __at (0xE000) unsigned char DATA_LATCH_LCD;         // WR_A15:LOW, A14:HIGH, A13:HIGH, A12:LOW  = LCD_DATA:HIGH
 
-//== LCD PORTS =================================================================
-// Data will com from latch
+//== PORTS MAP =================================================================
+
+//-- PORT P1 -------------------------------------------------------------------
+// LCD Controls
 #define LCD_RS    P1_0                  // LCD Register Select: Data(High)/Instruction(LOW)
 #define LCD_RW    P1_1                  // LCD Read(HIGH)/Write(LOW)
 #define LCD_E     P1_2                  // LCD Enable
+// P1.3                                 Not used
+// P1.4                                 Not used
+// P1.5                                 Not used
+// P1.6                                 Not used
+// P1.7                                 Not used
 
-//== INPUT: ROTATORY ENCODER ===================================================
-#define ROT_CLOCK   P3_0                // ROTATORY: [INTERRUPT 0] Clock
-#define ROT_SWITCH  P3_1                // ROTATORY: [INTERRUPT 1] Switch
-#define ROT_DATA    P3_2                // ROTATORY: Data
+//-- PORT P3 -------------------------------------------------------------------
+// P3.0 => RxD                          Serial Data Read
+// P3.1 => TxD                          Serial Data Transmit
+// ROTATORY ENCODER
+#define ROT_CLOCK   P3_2                // ROTATORY: [INTERRUPT 0] Clock
+#define ROT_SWITCH  P3_3                // ROTATORY: [INTERRUPT 1] Switch
+#define ROT_DATA    P3_4                // ROTATORY: Data
+// P3.5 => TIMER1                       Not used
+// P3.6 => WR#                          External RAM Write
+// P3.7 => WR#                          External RAM Read
 
 //== STATUS LED'S ==============================================================
 // There 7 LED's on leds on LED_DATA latch
@@ -104,6 +117,8 @@ unsigned char led_status_map = 0x00;    // 8 Bytes: Keep LED states to update LE
 //    MATRIX_DB = value | led_matrix_db;
 //}
 
+//== Others Functions ==========================================================
+
 /**
  *
  * @param unsigned char led
@@ -118,6 +133,24 @@ void set_led_status(unsigned char led, bool state)
         led_status_map |= led;          //  To enable a bit, use just OR
     }
     DATA_LATCH_LED = led_status_map;
+}
+
+
+/**
+ * Function for creating delay in milliseconds.
+ * Current Clock 11.1 MHz
+ * @param time
+ */
+void ms_delay(unsigned int time) {
+
+    // Must calculate from CPU clock/cristal
+    //CPU_CLOCK
+    // Clock: 12MHz = 83.333ns
+    // Cycles per loop for = 12 ~= 999,96ms ~= 1us
+    unsigned i,j ;
+    for(i=0;i<time;i++)
+        for(j=0;j<1275;j++);            //TODO: Adjust to get 1ms
+
 }
 
 //== LCD Functions =============================================================
@@ -135,60 +168,46 @@ void set_led_status(unsigned char led, bool state)
  * Function to send command instruction to LCD
  * @param command
  */
-//void lcd_cmd(unsigned char command)
-//{
-//    LCD_DATA = command;
-//    LCD_RS   = 0;
-//    LCD_RW   = 0;
-//    LCD_E    = 1;
-//    ms_delay(1);
-//    LCD_E    = 0;
-//}
+void lcd_cmd(unsigned char command)
+{
+    DATA_LATCH_LCD = command;
+    LCD_RS   = 0;
+    LCD_RW   = 0;
+    LCD_E    = 1;
+    ms_delay(1);
+    LCD_E    = 0;
+}
 
 /**
  * Function to send display data to LCD
  * @param disp_data
  */
-//void lcd_data(unsigned char disp_data)
-//{
-//    LCD_DATA = disp_data;
-//    LCD_RS   = 1;
-//    LCD_RW   = 0;
-//    LCD_E    = 1;
-//    ms_delay(1);
-//    LCD_E    = 0;
-//}
+void lcd_data(unsigned char disp_data)
+{
+    DATA_LATCH_LCD = disp_data;
+    LCD_RS   = 1;
+    LCD_RW   = 0;
+    LCD_E    = 1;
+    ms_delay(1);
+    LCD_E    = 0;
+}
 
 /**
  * Function to prepare the LCD  and get it ready
  */
-//void lcd_init(void)
-//{
-//    lcd_cmd(0x38);  // for using 2 lines and 5X7 matrix of LCD
-//    ms_delay(10);
-//    lcd_cmd(0x0F);  // turn display ON, cursor blinking
-//    ms_delay(10);
-//    lcd_cmd(0x01);  //clear screen
-//    ms_delay(10);
-//    lcd_cmd(0x81);  // bring cursor to position 1 of line 1
-//    ms_delay(10);
-//}
-
-/**
- * Function for creating delay in milliseconds.
- * Current Clock 11.1 MHz
- * @param time
- */
-void ms_delay(unsigned int time) {
-    // Must calculate from CPU clock/cristal
-    //CPU_CLOCK
-    // Clock: 12MHz = 83.333ns
-    // Cycles per loop for = 12 ~= 999,96ms ~= 1us
-    unsigned i,j ;
-    for(i=0;i<time;i++)
-        for(j=0;j<1275;j++);            //TODO: Adjust to get 1ms
-
+void lcd_init(void)
+{
+    lcd_cmd(0x38);  // for using 2 lines and 5X7 matrix of LCD
+    ms_delay(10);
+    lcd_cmd(0x0F);  // turn display ON, cursor blinking
+    ms_delay(10);
+    lcd_cmd(0x01);  // clear screen
+    ms_delay(10);
+    //lcd_cmd(0x81);  // bring cursor to position 1 of line 1
+    lcd_cmd(0x80);  // bring cursor to position 0 of line 1
+    ms_delay(10);
 }
+
 
 //== Tests =====================================================================
 // TODO: Make serial implementation
@@ -212,17 +231,18 @@ void setup(void)
     IP  = 0;                            // Interrupt Priority: Disable all
     PSW = 0;                            // Program Status World: Clear
     P0  = 0xFF;                         // Port 0: All alternate function Data/Address A0-A7
-    P1  = 0x00;                         // Port 1: We use as LCD data bus
+    P1  = 0x00;                         // Port 1: We use as mixed function I/O: LCD Control
     P2  = 0xFF;                         // Port 2: All alternate function Address A8-A15
-    P3  = 0xC3;                         // Port 3: We use as mixed function: 0b11000011 = 0xC3;
-    //   P3.0 - RxD     Alternate
-    //   P3.1 - TxD     Alternate
-    //   P3.2 - NC
-    //   P3.3 - LCD_RS  Buss
-    //   P3.4 - LCD_RW  Buss
-    //   P3.5 - LCD_E   Buss
-    //   P3.6 - WR#     Alternate
-    //   P3.7 - RD#     Alternate
+    P3  = 0xFF;                         // Port 3: We use secondary functions like Interrupts
+
+    //   P1.0 - RxD     Alternate
+    //   P1.1 - TxD     Alternate
+    //   P1.2 - NC
+    //   P1.3 - LCD_RS  Buss
+    //   P1.4 - LCD_RW  Buss
+    //   P1.5 - LCD_E   Buss
+    //   P1.6 - WR#     Alternate
+    //   P1.7 - RD#     Alternate
 
 //    led_matrix_da = 0x00;               // Reset LED state
 //    led_matrix_db = 0x00;               // Reset LED state
@@ -235,6 +255,18 @@ void setup(void)
     DATA_LATCH_MATRIX = 0x00;
     DATA_LATCH_LED    = 0x00;
     DATA_LATCH_LCD    = 0x00;
+
+    lcd_init();
+  //unsigned char a[15]="CIRCUIT DIGEST";    //string of 14 characters with a null terminator.
+    unsigned char a[17]="ETEP MATRIX 8031";    //string of 14 characters with a null terminator.
+    int l=0;
+
+    while(a[l] != '\0') // searching the null terminator in the sentence
+    {
+        lcd_data(a[l]);
+        l++;
+        ms_delay(50);
+    }
 
 }
 
@@ -258,7 +290,6 @@ int main(void)
 //        set_led_status(LED_MATRIX, state);
 //        ms_delay(100);
 //        state = ~state;
-
 //        MATRIX_DA = 0x08;
 //        ms_delay(100);
 //        MATRIX_DA = 0x88;
@@ -286,6 +317,8 @@ int main(void)
 
         ms_delay(100);
         DATA_LATCH_LED = 0x00;
+        led_status_map = 0x00;
+        ms_delay(100);
     }
     // return 0;
 }
