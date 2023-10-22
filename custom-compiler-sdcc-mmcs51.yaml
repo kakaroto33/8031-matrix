@@ -1,4 +1,5 @@
 # To use this file in CLion, select it in: Settings->Build, Execution, Deployment->Toolchains->Custom Compiler
+# Ref: https://www.jetbrains.com/help/clion/custom-compilers.html
 
 compilers:
 
@@ -8,6 +9,13 @@ compilers:
     code-insight-target-name: avr
     include-dirs: "${compiler-exe-dir}/../include"
     defines-text: "
+
+#define __at(n)
+#define __interrupt(n)
+"
+
+# Defines is not full used by CMake ??
+
 #define __STDC_VERSION__ 201112L
 #define __STDC_HOSTED__ 0
 #define __STDC_UTF_16__ 1
@@ -31,9 +39,10 @@ compilers:
 #define __SDCC 4_3_0
 
 #define __at(n)
+#define __interrupt(n)
 
-"
 
+#define __SDCC_MODEL_SMALL 1
 # https://sourceforge.net/p/predef/wiki/Standards/
 #define __STDC_VERSION__ 201112L
 #define	__STDC_VERSION__ = 199901L

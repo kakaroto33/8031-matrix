@@ -1,14 +1,19 @@
-/**
- * ETEP Led Matrix 8051 Project
- *
- * Main executable.
- */
+//
+// Created by k33 on 10/22/2023.
+//
+// Define configurations and macros of 8031 board
+//
 
-//#include "main.h"
+#ifndef ETEP_SDCC_8031_BOARD_H
+#define ETEP_SDCC_8031_BOARD_H
+
+//----------------------------------------------------------------------------------------------------------------------
+
 //#include <stdio.h>
-#include <stdio.h>
 #include <mcs51/8051.h>
 #include <stdbool.h>
+
+//#include "library/common.h"
 
 //== MEMORY MAP ================================================================
 
@@ -45,10 +50,18 @@
 //== DATA LATCHES ============================================================
 // Matrix latches is accessible in high address as RAM, need Write operations (WR#)
 // These port controls is all on A15:HIGH or address above 0x8000
-                                                            // WR_A15 = (A15 NAND ¬WR#)
+// WR_A15 = (A15 NAND ¬WR#)
 __xdata __at (0xB000) unsigned char DATA_LATCH_MATRIX;      // WR_A15:LOW, A14:LOW , A13:HIGH, A12:HIGH = MATRIX_DATA:HIGH
 __xdata __at (0xD000) unsigned char DATA_LATCH_LED;         // WR_A15:LOW, A14:HIGH, A13:LOW , A12:HIGH = LED_DATA:HIGH
 __xdata __at (0xE000) unsigned char DATA_LATCH_LCD;         // WR_A15:LOW, A14:HIGH, A13:HIGH, A12:LOW  = LCD_DATA:HIGH
+
+//== INTERRUPTS ================================================================
+
+#define INTERRUPT_EXTERNAL_0    0x03    // 0
+#define INTERRUPT_TIMER_0       0x0B    // 1
+#define INTERRUPT_EXTERNAL_1    0x13    // 2
+#define INTERRUPT_TIMER_1       0x1b    // 3
+#define INTERRUPT_SERIAL        0x23    // 4
 
 //== PORTS MAP =================================================================
 
@@ -85,17 +98,7 @@ __xdata __at (0xE000) unsigned char DATA_LATCH_LCD;         // WR_A15:LOW, A14:H
 #define LED_USER_PROG   0x20            // [0b00100000] GREEN: Started user program
 #define LED_INTERRUPT   0x40            // [0b01000000] RED: On any interrupt started
 //                      0x80            // RED: Last LED is connected to reset button.
-//== GLOBAL VARIABLES ==========================================================
 
-unsigned char led_status_map = 0x00;    // 8 Bytes: Keep LED states to update LED_DATA
-
-//== SPECIAL FUNCTIONS =========================================================
-// This a single Assemble Instruction NOP
-// On 8051 Family this will take 12 clock cycles.
-#define NOP() \
-    __asm     \
-        nop   \
-    __endasm  \
 
 //== Matrix Functions ==========================================================
 
@@ -117,108 +120,7 @@ unsigned char led_status_map = 0x00;    // 8 Bytes: Keep LED states to update LE
 //    MATRIX_DB = value | led_matrix_db;
 //}
 
-//== Others Functions ==========================================================
-
-/**
- *
- * @param unsigned char led
- * @param bool state
- * @return void
- */
-void set_led_status(unsigned char led, bool state)
-{
-    if (state == false) {
-        led_status_map &= ~led;         // To disable a bit, use AND with complement bits (inverted)
-    } else {
-        led_status_map |= led;          //  To enable a bit, use just OR
-    }
-    DATA_LATCH_LED = led_status_map;
-}
-
-
-/**
- * Function for creating delay in milliseconds.
- * Current Clock 11.1 MHz
- * @param time
- */
-void ms_delay(unsigned int time) {
-
-    // Must calculate from CPU clock/cristal
-    //CPU_CLOCK
-    // Clock: 12MHz = 83.333ns
-    // Cycles per loop for = 12 ~= 999,96ms ~= 1us
-    unsigned i,j ;
-    for(i=0;i<time;i++)
-        for(j=0;j<1275;j++);            //TODO: Adjust to get 1ms
-
-}
-
-//== LCD Functions =============================================================
-//TODO: Move to external lib
-// FROM: https://circuitdigest.com/microcontroller-projects/lcd-interfacing-with-8051-microcontroller-89s52
-//
-//#define display_port P2      //Data pins connected to port 2 on microcontroller
-//sbit rs = P3^2;  //RS pin connected to pin 2 of port 3
-//sbit rw = P3^3;  // RW pin connected to pin 3 of port 3
-//sbit e =  P3^4;  //E pin connected to pin 4 of port 3
-
-
-
-/**
- * Function to send command instruction to LCD
- * @param command
- */
-void lcd_cmd(unsigned char command)
-{
-    DATA_LATCH_LCD = command;
-    LCD_RS   = 0;
-    LCD_RW   = 0;
-    LCD_E    = 1;
-    ms_delay(1);
-    LCD_E    = 0;
-}
-
-/**
- * Function to send display data to LCD
- * @param disp_data
- */
-void lcd_data(unsigned char disp_data)
-{
-    DATA_LATCH_LCD = disp_data;
-    LCD_RS   = 1;
-    LCD_RW   = 0;
-    LCD_E    = 1;
-    ms_delay(1);
-    LCD_E    = 0;
-}
-
-/**
- * Function to prepare the LCD  and get it ready
- */
-void lcd_init(void)
-{
-    lcd_cmd(0x38);  // for using 2 lines and 5X7 matrix of LCD
-    ms_delay(10);
-    lcd_cmd(0x0F);  // turn display ON, cursor blinking
-    ms_delay(10);
-    lcd_cmd(0x01);  // clear screen
-    ms_delay(10);
-    //lcd_cmd(0x81);  // bring cursor to position 1 of line 1
-    lcd_cmd(0x80);  // bring cursor to position 0 of line 1
-    ms_delay(10);
-}
-
-
-//== Tests =====================================================================
-// TODO: Make serial implementation
-//int putchar(int c) {
-//  c = c; // Filling sausage
-//  //fake function
-//  return 1;
-//}
-
-
-//== Main Functions =============================================================
+//== Main Functions ============================================================
 
 
 /**
@@ -228,6 +130,7 @@ void lcd_init(void)
 void setup(void)
 {
     IE  = 0;                            // Interrupt Enable: Disable all
+    EA  = 0;
     IP  = 0;                            // Interrupt Priority: Disable all
     PSW = 0;                            // Program Status World: Clear
     P0  = 0xFF;                         // Port 0: All alternate function Data/Address A0-A7
@@ -257,70 +160,36 @@ void setup(void)
     DATA_LATCH_LCD    = 0x00;
 
     lcd_init();
-  //unsigned char a[15]="CIRCUIT DIGEST";    //string of 14 characters with a null terminator.
-    unsigned char a[17]="ETEP MATRIX 8031";    //string of 14 characters with a null terminator.
-    int l=0;
 
-    while(a[l] != '\0') // searching the null terminator in the sentence
-    {
-        lcd_data(a[l]);
-        l++;
-        ms_delay(50);
-    }
+//    volatile unsigned int autoReloadvalue = 200;
+//    TMOD  |= 0x20;
+//    SCON  |= 0x50;
+//    TL1    = autoReloadvalue >> 8;
+//    TH1    = autoReloadvalue;
+//    TR1    = 1;
 
-}
-
-/**
- * Main function call
- * @return int
- */
-int main(void)
-{
-    setup();        // Setup IO and Registers
-//    NOP();
-//    NOP();
-//    printf("Hello, World from C!");
-    bool state = true;
-    for(;;) {
-        // Set LED Status ON and OFF each loop
-//        set_led_status(LED_STATUS, state);
-//        ms_delay(100);
-//        set_led_status(LED_BIT_USER , state);
-//        ms_delay(100);
-//        set_led_status(LED_MATRIX, state);
-//        ms_delay(100);
-//        state = ~state;
-//        MATRIX_DA = 0x08;
-//        ms_delay(100);
-//        MATRIX_DA = 0x88;
-//        ms_delay(100);
-//        MATRIX_DB = 0x08;
-//        ms_delay(100);
-//        MATRIX_DA = 0x00;
-//        MATRIX_DB = 0x00;
-//        ms_delay(100);
-//        set_matrix_status(LED_STATUS, state);
-//        state = ~state;
-        set_led_status(LED_MATRIX, true);
-        ms_delay(100);
-        set_led_status(LED_ENC_INPUT, true);
-        ms_delay(100);
-        set_led_status(LED_TERMINAL, true);
-        ms_delay(100);
-        set_led_status(LED_WAIT_PROG, true);
-        ms_delay(100);
-        set_led_status(LED_STATUS, true);
-        ms_delay(100);
-        set_led_status(LED_USER_PROG, true);
-        ms_delay(100);
-        set_led_status(LED_INTERRUPT, true);
-
-        ms_delay(100);
-        DATA_LATCH_LED = 0x00;
-        led_status_map = 0x00;
-        ms_delay(100);
-    }
-    // return 0;
+    //SetOsc(OSC_FREQ);             // Set Oscillator Freq
+    //Serialbegin(OSC_FREQ, BAUD_RATE);       // Set Baud Rate
+//    Serialflush();                // Clear the buffers
+//    Serialprint("uart test\n\r"); // Print a string
+//    setSerialinterrupt();         // Enable Serial Interrupt
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+
+#endif //ETEP_SDCC_8031_BOARD_H

@@ -32,7 +32,8 @@ REf:
 - https://www.analog.com/en/app-notes/using-the-free-sdcc-c-compiler-to-develop-firmware-for-the-ds89c430450-family-of-microcontrollers.html
 - https://embarcados.com.br/compilando-c-para-8051-com-sdcc/
 - https://wiki.laptop.org/go/SDCC
-
+- https://github.com/AguHDz/SDCC-8051
+  - https://github.com/AguHDz/SDCC-8051/blob/master/Libs/LCD.h
 - file:///C:/Program%20Files/SDCC/doc/sdccman.html/node104.html
 
 
@@ -45,3 +46,4 @@ uCsim: 8051 Simulator for Intel Hex Files:
 
 CMake:  
  - https://cmake.org/cmake/help/latest/index.html
+ - https://github.com/eduardoaugustojulio/8051

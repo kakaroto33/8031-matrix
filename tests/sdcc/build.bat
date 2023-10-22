@@ -12,6 +12,7 @@ del %SOURCE%.rel
 del %SOURCE%.rst
 del %SOURCE%.sym
 del %SOURCE%.hex
-sdcc.exe  -V --std c99 --model-small --fverbose-asm -mmcs51 -p8031 ../../main.c
+sdcc.exe  -V --std c99 --fverbose-asm -mmcs51 -p8031 --model-medium --int-long-reent --float-reent ../../main.c
+REM sdcc.exe  -V --std c99 --fverbose-asm -mmcs51 -p8031 --model-small ../../main.c
 
 packihx  %SOURCE%.ihx > %SOURCE%.hex

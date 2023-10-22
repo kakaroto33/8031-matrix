@@ -11,3 +11,5 @@
 /*.adb
 /*.cdb
 /*.omf
+/8031/cmake-build-debug
+/8031/board/cmake-build-debug

@@ -289,15 +289,15 @@ _uartReadByte::
 	.ds 1
 _Serialbegin_PARM_2:
 	.ds 4
-_Serialbegin_autoReloadvalue_65536_26:
+_Serialbegin_autoReloadvalue_65536_25:
 	.ds 2
-_SerialIntWrite_tempBuffer_65536_37:
+_SerialIntWrite_tempBuffer_65536_36:
 	.ds 3
 _led_status_map::
 	.ds 1
 _set_led_status_PARM_2:
 	.ds 1
-_main_a_65537_64:
+_main_a_65537_63:
 	.ds 17
 ;--------------------------------------------------------
 ; uninitialized external ram data
@@ -330,15 +330,6 @@ _DATA_LATCH_LCD	=	0xe000
 	.area HOME    (CODE)
 __interrupt_vect:
 	ljmp	__sdcc_gsinit_startup
-	reti
-	.ds	7
-	reti
-	.ds	7
-	reti
-	.ds	7
-	reti
-	.ds	7
-	ljmp	_uartISR
 ;--------------------------------------------------------
 ; global & static initialisations
 ;--------------------------------------------------------
@@ -352,13 +343,13 @@ __interrupt_vect:
 	.globl __mcs51_genXINIT
 	.globl __mcs51_genXRAMCLEAR
 	.globl __mcs51_genRAMCLEAR
-;	../../main.c:130: volatile unsigned char uartNewLineFlag = 0;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:130: volatile unsigned char uartNewLineFlag = 0;
 ;	genAssign
 	mov	r0,#_uartNewLineFlag
 ;	Peephole 181	changed mov to clr
 	clr	a
 	movx	@r0,a
-;	../../main.c:134: volatile unsigned int  uartReadCount    = 0;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:134: volatile unsigned int  uartReadCount    = 0;
 ;	genAssign
 	mov	r0,#_uartReadCount
 ;	genFromRTrack acc==0x00
@@ -366,17 +357,17 @@ __interrupt_vect:
 ;	genFromRTrack acc==0x00
 	inc	r0
 	movx	@r0,a
-;	../../main.c:136: volatile unsigned char uartNewLineCount = 0;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:136: volatile unsigned char uartNewLineCount = 0;
 ;	genAssign
 	mov	r0,#_uartNewLineCount
 ;	genFromRTrack acc==0x00
 	movx	@r0,a
-;	../../main.c:140: volatile unsigned char uartReadByte = CHAR_NULL;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:140: volatile unsigned char uartReadByte = CHAR_NULL;
 ;	genAssign
 	mov	r0,#_uartReadByte
 ;	genFromRTrack acc==0x00
 	movx	@r0,a
-;	../../main.c:405: unsigned char led_status_map = 0x00;    // 8 Bytes: Keep LED states to update LED_DATA
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:405: unsigned char led_status_map = 0x00;    // 8 Bytes: Keep LED states to update LED_DATA
 ;	genAssign
 	mov	r0,#_led_status_map
 ;	genFromRTrack acc==0x00
@@ -398,7 +389,7 @@ __sdcc_program_startup:
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'Serialbegin'
 ;------------------------------------------------------------
-;	../../main.c:151: void Serialbegin(unsigned long OscillatorFrequency,unsigned long baudRate)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:151: void Serialbegin(unsigned long OscillatorFrequency,unsigned long baudRate)
 ;	-----------------------------------------
 ;	 function Serialbegin
 ;	-----------------------------------------
@@ -416,7 +407,7 @@ _Serialbegin:
 	mov	r5,dph
 	mov	r6,b
 	mov	r7,a
-;	../../main.c:156: autoReloadvalue =  __baudRate_calc_timer_1(OscillatorFrequency,baudRate);
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:156: autoReloadvalue =  __baudRate_calc_timer_1(OscillatorFrequency,baudRate);
 ;	genIpush
 	mov	a,#0x80
 	push	acc
@@ -468,7 +459,7 @@ _Serialbegin:
 	mov	sp,a
 ;	genCast
 ;	genMinus
-	mov	r0,#_Serialbegin_autoReloadvalue_65536_26
+	mov	r0,#_Serialbegin_autoReloadvalue_65536_25
 ;	Peephole 181	changed mov to clr
 	clr	a
 	clr	c
@@ -478,39 +469,39 @@ _Serialbegin:
 	subb	a,r5
 	inc	r0
 	movx	@r0,a
-;	../../main.c:157: TMOD  |= 0x20;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:157: TMOD  |= 0x20;
 ;	genOr
 	orl	_TMOD,#0x20
-;	../../main.c:158: SCON  |= 0x50;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:158: SCON  |= 0x50;
 ;	genOr
 	orl	_SCON,#0x50
-;	../../main.c:159: TL1    = autoReloadvalue >> 8;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:159: TL1    = autoReloadvalue >> 8;
 ;	genGetByte
 ;	Peephole 263.c	optimized loading const
-	mov	r0,#(_Serialbegin_autoReloadvalue_65536_26 + 1)
+	mov	r0,#(_Serialbegin_autoReloadvalue_65536_25 + 1)
 	movx	a,@r0
 	mov	_TL1,a
-;	../../main.c:160: TH1    = autoReloadvalue;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:160: TH1    = autoReloadvalue;
 ;	genCast
-	mov	r0,#_Serialbegin_autoReloadvalue_65536_26
+	mov	r0,#_Serialbegin_autoReloadvalue_65536_25
 	movx	a,@r0
 	mov	_TH1,a
-;	../../main.c:161: TR1    = 1;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:161: TR1    = 1;
 ;	genAssign
 ;	assignBit
 	setb	_TR1
 ;	Peephole 500	removed redundant label 00101$
-;	../../main.c:174: }
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:174: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'Serialavailable'
 ;------------------------------------------------------------
-;	../../main.c:181: unsigned char Serialavailable(void)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:181: unsigned char Serialavailable(void)
 ;	-----------------------------------------
 ;	 function Serialavailable
 ;	-----------------------------------------
 _Serialavailable:
-;	../../main.c:183: return RI;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:183: return RI;
 ;	genCast
 	mov	c,_RI
 	clr	a
@@ -518,69 +509,69 @@ _Serialavailable:
 	mov	dpl,a
 ;	genRet
 ;	Peephole 500	removed redundant label 00101$
-;	../../main.c:184: }
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:184: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'Serialwrite'
 ;------------------------------------------------------------
-;	../../main.c:192: void Serialwrite(unsigned char Byte)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:192: void Serialwrite(unsigned char Byte)
 ;	-----------------------------------------
 ;	 function Serialwrite
 ;	-----------------------------------------
 _Serialwrite:
 ;	genReceive
 	mov	r7,dpl
-;	../../main.c:195: EA = 0;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:195: EA = 0;
 ;	genAssign
 ;	assignBit
 	clr	_EA
-;	../../main.c:197: SBUF = Byte;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:197: SBUF = Byte;
 ;	genAssign
 	mov	_SBUF,r7
-;	../../main.c:198: while(!TI);
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:198: while(!TI);
 00101$:
 ;	genIfx
 ;	genIfxJump
 ;	Peephole 108.d	removed ljmp by inverse jump logic
-;	../../main.c:199: TI   = 0;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:199: TI   = 0;
 ;	genAssign
 ;	assignBit
 ;	Peephole 250.a	using atomic test and clear
 	jbc	_TI,00114$
 	sjmp	00101$
 00114$:
-;	../../main.c:201: EA = 1;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:201: EA = 1;
 ;	genAssign
 ;	assignBit
 	setb	_EA
 ;	Peephole 500	removed redundant label 00104$
-;	../../main.c:203: }
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:203: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'Serialread'
 ;------------------------------------------------------------
-;	../../main.c:212: unsigned char Serialread(void)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:212: unsigned char Serialread(void)
 ;	-----------------------------------------
 ;	 function Serialread
 ;	-----------------------------------------
 _Serialread:
-;	../../main.c:214: while(!RI);
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:214: while(!RI);
 00101$:
 ;	genIfx
 ;	genIfxJump
 ;	Peephole 108.d	removed ljmp by inverse jump logic
 	jnb	_RI,00101$
 ;	Peephole 500	removed redundant label 00114$
-;	../../main.c:215: return SBUF;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:215: return SBUF;
 ;	genRet
 	mov	dpl,_SBUF
 ;	Peephole 500	removed redundant label 00104$
-;	../../main.c:216: }
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:216: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'Serialprint'
 ;------------------------------------------------------------
-;	../../main.c:223: void Serialprint(unsigned char *sPtr)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:223: void Serialprint(unsigned char *sPtr)
 ;	-----------------------------------------
 ;	 function Serialprint
 ;	-----------------------------------------
@@ -590,7 +581,7 @@ _Serialprint:
 	mov	r6,dph
 	mov	r7,b
 00103$:
-;	../../main.c:225: for(;*sPtr!='\0';Serialwrite(*(sPtr++)));
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:225: for(;*sPtr!='\0';Serialwrite(*(sPtr++)));
 ;	genPointerGet
 ;	genGenPointerGet
 	mov	dpl,r5
@@ -623,12 +614,12 @@ _Serialprint:
 ;	Peephole 112.b	changed ljmp to sjmp
 	sjmp	00103$
 00105$:
-;	../../main.c:226: }
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:226: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'SerialIntWrite'
 ;------------------------------------------------------------
-;	../../main.c:234: void SerialIntWrite(signed int num)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:234: void SerialIntWrite(signed int num)
 ;	-----------------------------------------
 ;	 function SerialIntWrite
 ;	-----------------------------------------
@@ -636,7 +627,7 @@ _SerialIntWrite:
 ;	genReceive
 	mov	r6,dpl
 	mov	r7,dph
-;	../../main.c:237: sprintf(tempBuffer,"%d",num);
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:237: sprintf(tempBuffer,"%d",num);
 ;	genIpush
 	push	ar6
 	push	ar7
@@ -648,7 +639,7 @@ _SerialIntWrite:
 	mov	a,#0x80
 	push	acc
 ;	genIpush
-	mov	r0,#_SerialIntWrite_tempBuffer_65536_37
+	mov	r0,#_SerialIntWrite_tempBuffer_65536_36
 	movx	a,@r0
 	push	acc
 	inc	r0
@@ -662,9 +653,9 @@ _SerialIntWrite:
 	mov	a,sp
 	add	a,#0xf8
 	mov	sp,a
-;	../../main.c:238: Serialprint((unsigned char*)tempBuffer);
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:238: Serialprint((unsigned char*)tempBuffer);
 ;	genCall
-	mov	r0,#_SerialIntWrite_tempBuffer_65536_37
+	mov	r0,#_SerialIntWrite_tempBuffer_65536_36
 	movx	a,@r0
 	mov	dpl,a
 	inc	r0
@@ -673,38 +664,38 @@ _SerialIntWrite:
 	inc	r0
 	movx	a,@r0
 	mov	b,a
-;	../../main.c:239: }
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:239: }
 ;	Peephole 400.b	replaced lcall/ret with ljmp
 	ljmp	_Serialprint
 ;
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'setSerialinterrupt'
 ;------------------------------------------------------------
-;	../../main.c:249: void setSerialinterrupt(void)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:249: void setSerialinterrupt(void)
 ;	-----------------------------------------
 ;	 function setSerialinterrupt
 ;	-----------------------------------------
 _setSerialinterrupt:
-;	../../main.c:251: ES = 1;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:251: ES = 1;
 ;	genAssign
 ;	assignBit
 	setb	_ES
-;	../../main.c:252: EA = 1;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:252: EA = 1;
 ;	genAssign
 ;	assignBit
 	setb	_EA
 ;	Peephole 500	removed redundant label 00101$
-;	../../main.c:253: }
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:253: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'Serialflush'
 ;------------------------------------------------------------
-;	../../main.c:260: void Serialflush(void)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:260: void Serialflush(void)
 ;	-----------------------------------------
 ;	 function Serialflush
 ;	-----------------------------------------
 _Serialflush:
-;	../../main.c:263: uartReadCount    = 0;           // Clear Uart Byte Count
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:263: uartReadCount    = 0;           // Clear Uart Byte Count
 ;	genAssign
 	mov	r0,#_uartReadCount
 ;	Peephole 181	changed mov to clr
@@ -713,28 +704,28 @@ _Serialflush:
 ;	genFromRTrack acc==0x00
 	inc	r0
 	movx	@r0,a
-;	../../main.c:264: uartNewLineFlag  = 0;           // Clear New Line Flag
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:264: uartNewLineFlag  = 0;           // Clear New Line Flag
 ;	genAssign
 	mov	r0,#_uartNewLineFlag
 ;	genFromRTrack acc==0x00
 	movx	@r0,a
-;	../../main.c:265: uartNewLineCount = 0;           // Clear New Line Count
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:265: uartNewLineCount = 0;           // Clear New Line Count
 ;	genAssign
 	mov	r0,#_uartNewLineCount
 ;	genFromRTrack acc==0x00
 	movx	@r0,a
-;	../../main.c:266: uartReadByte     = CHAR_NULL;   // Clear Last Read Byte
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:266: uartReadByte     = CHAR_NULL;   // Clear Last Read Byte
 ;	genAssign
 	mov	r0,#_uartReadByte
 ;	genFromRTrack acc==0x00
 	movx	@r0,a
-;	../../main.c:269: for(i=0;i<=NEW_LINE_INDEX_BUFFER_SIZE;i++)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:269: for(i=0;i<=NEW_LINE_INDEX_BUFFER_SIZE;i++)
 ;	genAssign
 ;	genFromRTrack replaced	mov	r7,#0x00
 ;	Peephole 236.i	used r7 instead of ar7
 	mov	r7,a
 00103$:
-;	../../main.c:270: uartNewLineIndexes[i] = CHAR_NULL;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:270: uartNewLineIndexes[i] = CHAR_NULL;
 ;	genPlus
 	mov	a,r7
 	add	a,#_uartNewLineIndexes
@@ -745,7 +736,7 @@ _Serialflush:
 ;	Peephole 181	changed mov to clr
 	clr	a
 	movx	@r0,a
-;	../../main.c:269: for(i=0;i<=NEW_LINE_INDEX_BUFFER_SIZE;i++)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:269: for(i=0;i<=NEW_LINE_INDEX_BUFFER_SIZE;i++)
 ;	genPlus
 ;	genPlusIncr
 	inc	r7
@@ -758,11 +749,11 @@ _Serialflush:
 	add	a,#0xff - 0x0a
 	jnc	00103$
 ;	Peephole 500	removed redundant label 00123$
-;	../../main.c:273: for(i=0;i<=UART_RX_BUFFER_SIZE;i++)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:273: for(i=0;i<=UART_RX_BUFFER_SIZE;i++)
 ;	genAssign
 	mov	r7,#0x00
 00105$:
-;	../../main.c:274: uartReadBuffer[i] = CHAR_NULL;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:274: uartReadBuffer[i] = CHAR_NULL;
 ;	genPlus
 	mov	a,r7
 	add	a,#_uartReadBuffer
@@ -773,7 +764,7 @@ _Serialflush:
 ;	Peephole 181	changed mov to clr
 	clr	a
 	movx	@r0,a
-;	../../main.c:273: for(i=0;i<=UART_RX_BUFFER_SIZE;i++)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:273: for(i=0;i<=UART_RX_BUFFER_SIZE;i++)
 ;	genPlus
 ;	genPlusIncr
 	inc	r7
@@ -787,36 +778,36 @@ _Serialflush:
 	jnc	00105$
 ;	Peephole 500	removed redundant label 00124$
 ;	Peephole 500	removed redundant label 00107$
-;	../../main.c:275: }
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:275: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'SerialReadByteFlush'
 ;------------------------------------------------------------
-;	../../main.c:282: void SerialReadByteFlush(void)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:282: void SerialReadByteFlush(void)
 ;	-----------------------------------------
 ;	 function SerialReadByteFlush
 ;	-----------------------------------------
 _SerialReadByteFlush:
-;	../../main.c:284: uartReadByte     = CHAR_NULL;   // Clear Last Read Byte
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:284: uartReadByte     = CHAR_NULL;   // Clear Last Read Byte
 ;	genAssign
 	mov	r0,#_uartReadByte
 ;	Peephole 181	changed mov to clr
 	clr	a
 	movx	@r0,a
 ;	Peephole 500	removed redundant label 00101$
-;	../../main.c:285: }
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:285: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'set_led_status'
 ;------------------------------------------------------------
-;	../../main.c:443: void set_led_status(unsigned char led, bool state)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:443: void set_led_status(unsigned char led, bool state)
 ;	-----------------------------------------
 ;	 function set_led_status
 ;	-----------------------------------------
 _set_led_status:
 ;	genReceive
 	mov	r7,dpl
-;	../../main.c:445: if (state == false) {
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:445: if (state == false) {
 ;	genIfx
 	mov	r0,#_set_led_status_PARM_2
 	movx	a,@r0
@@ -824,7 +815,7 @@ _set_led_status:
 ;	Peephole 108.b	removed ljmp by inverse jump logic
 	jnz	00102$
 ;	Peephole 500	removed redundant label 00110$
-;	../../main.c:446: led_status_map &= ~led;         // To disable a bit, use AND with complement bits (inverted)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:446: led_status_map &= ~led;         // To disable a bit, use AND with complement bits (inverted)
 ;	genCpl
 	mov	a,r7
 	cpl	a
@@ -837,31 +828,31 @@ _set_led_status:
 ;	Peephole 112.b	changed ljmp to sjmp
 	sjmp	00103$
 00102$:
-;	../../main.c:448: led_status_map |= led;          //  To enable a bit, use just OR
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:448: led_status_map |= led;          //  To enable a bit, use just OR
 ;	genOr
 	mov	r0,#_led_status_map
 	movx	a,@r0
 	orl	a,r7
 	movx	@r0,a
 00103$:
-;	../../main.c:450: DATA_LATCH_LED = led_status_map;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:450: DATA_LATCH_LED = led_status_map;
 ;	genAssign
 	mov	r0,#_led_status_map
 	mov	dptr,#_DATA_LATCH_LED
 	movx	a,@r0
 	movx	@dptr,a
 ;	Peephole 500	removed redundant label 00104$
-;	../../main.c:451: }
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:451: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'ms_delay'
 ;------------------------------------------------------------
-;	../../main.c:459: void ms_delay(unsigned int time) {
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:459: void ms_delay(unsigned int time) {
 ;	-----------------------------------------
 ;	 function ms_delay
 ;	-----------------------------------------
 _ms_delay:
-;	../../main.c:468: for(i=0;i<time;i++)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:468: for(i=0;i<time;i++)
 ;	genAssign
 	mov	r6,#0x00
 	mov	r7,#0x00
@@ -873,7 +864,7 @@ _ms_delay:
 ;	Peephole 108.a	removed ljmp by inverse jump logic
 	jnc	00109$
 ;	Peephole 500	removed redundant label 00129$
-;	../../main.c:469: for(j=0;j<one_ms;j++);            //TODO: Adjust to get 1ms
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:469: for(j=0;j<one_ms;j++);            //TODO: Adjust to get 1ms
 ;	genAssign
 	mov	r4,#0x00
 	mov	r5,#0x00
@@ -895,7 +886,7 @@ _ms_delay:
 ;	Peephole 500	removed redundant label 00131$
 	sjmp	00104$
 00108$:
-;	../../main.c:468: for(i=0;i<time;i++)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:468: for(i=0;i<time;i++)
 ;	genPlus
 ;	genPlusIncr
 	inc	r6
@@ -906,176 +897,176 @@ _ms_delay:
 ;	Peephole 500	removed redundant label 00132$
 	sjmp	00107$
 00109$:
-;	../../main.c:473: }
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:473: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'lcd_cmd'
 ;------------------------------------------------------------
-;	../../main.c:490: void lcd_cmd(unsigned char command)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:490: void lcd_cmd(unsigned char command)
 ;	-----------------------------------------
 ;	 function lcd_cmd
 ;	-----------------------------------------
 _lcd_cmd:
 ;	genReceive
 	mov	r7,dpl
-;	../../main.c:492: DATA_LATCH_LCD = command;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:492: DATA_LATCH_LCD = command;
 ;	genAssign
 	mov	dptr,#_DATA_LATCH_LCD
 	mov	a,r7
 	movx	@dptr,a
-;	../../main.c:493: LCD_RS   = 0;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:493: LCD_RS   = 0;
 ;	genAssign
 ;	assignBit
 	clr	_P1_0
-;	../../main.c:494: LCD_RW   = 0;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:494: LCD_RW   = 0;
 ;	genAssign
 ;	assignBit
 	clr	_P1_1
-;	../../main.c:495: LCD_E    = 1;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:495: LCD_E    = 1;
 ;	genAssign
 ;	assignBit
 	setb	_P1_2
-;	../../main.c:497: LCD_E    = 0;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:497: LCD_E    = 0;
 ;	genAssign
 ;	assignBit
 	clr	_P1_2
 ;	Peephole 500	removed redundant label 00101$
-;	../../main.c:498: }
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:498: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'lcd_data'
 ;------------------------------------------------------------
-;	../../main.c:504: void lcd_data(unsigned char disp_data)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:504: void lcd_data(unsigned char disp_data)
 ;	-----------------------------------------
 ;	 function lcd_data
 ;	-----------------------------------------
 _lcd_data:
 ;	genReceive
 	mov	r7,dpl
-;	../../main.c:506: DATA_LATCH_LCD = disp_data;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:506: DATA_LATCH_LCD = disp_data;
 ;	genAssign
 	mov	dptr,#_DATA_LATCH_LCD
 	mov	a,r7
 	movx	@dptr,a
-;	../../main.c:507: LCD_RS   = 1;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:507: LCD_RS   = 1;
 ;	genAssign
 ;	assignBit
 	setb	_P1_0
-;	../../main.c:508: LCD_RW   = 0;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:508: LCD_RW   = 0;
 ;	genAssign
 ;	assignBit
 	clr	_P1_1
-;	../../main.c:509: LCD_E    = 1;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:509: LCD_E    = 1;
 ;	genAssign
 ;	assignBit
 	setb	_P1_2
-;	../../main.c:511: LCD_E    = 0;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:511: LCD_E    = 0;
 ;	genAssign
 ;	assignBit
 	clr	_P1_2
 ;	Peephole 500	removed redundant label 00101$
-;	../../main.c:512: }
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:512: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'lcd_init'
 ;------------------------------------------------------------
-;	../../main.c:517: void lcd_init(void)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:517: void lcd_init(void)
 ;	-----------------------------------------
 ;	 function lcd_init
 ;	-----------------------------------------
 _lcd_init:
-;	../../main.c:519: lcd_cmd(0x38);  // for using 2 lines and 5X7 matrix of LCD
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:519: lcd_cmd(0x38);  // for using 2 lines and 5X7 matrix of LCD
 ;	genCall
 	mov	dpl,#0x38
 	lcall	_lcd_cmd
-;	../../main.c:521: lcd_cmd(0x0F);  // turn display ON, cursor blinking
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:521: lcd_cmd(0x0F);  // turn display ON, cursor blinking
 ;	genCall
 	mov	dpl,#0x0f
 	lcall	_lcd_cmd
-;	../../main.c:523: lcd_cmd(0x01);  // clear screen
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:523: lcd_cmd(0x01);  // clear screen
 ;	genCall
 	mov	dpl,#0x01
 	lcall	_lcd_cmd
-;	../../main.c:526: lcd_cmd(0x80);  // bring cursor to position 0 of line 1
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:526: lcd_cmd(0x80);  // bring cursor to position 0 of line 1
 ;	genCall
 	mov	dpl,#0x80
 	lcall	_lcd_cmd
-;	../../main.c:528: NOP();  // This fix some randon behavior on compiler ??
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:528: NOP();  // This fix some randon behavior on compiler ??
 ;	genInline
 	nop 
 ;	Peephole 500	removed redundant label 00101$
-;	../../main.c:529: }
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:529: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'setup'
 ;------------------------------------------------------------
-;	../../main.c:558: void setup(void)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:558: void setup(void)
 ;	-----------------------------------------
 ;	 function setup
 ;	-----------------------------------------
 _setup:
-;	../../main.c:560: IE  = 0;                            // Interrupt Enable: Disable all
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:560: IE  = 0;                            // Interrupt Enable: Disable all
 ;	genAssign
 	mov	_IE,#0x00
-;	../../main.c:561: EA  = 0;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:561: EA  = 0;
 ;	genAssign
 ;	assignBit
 	clr	_EA
-;	../../main.c:562: IP  = 0;                            // Interrupt Priority: Disable all
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:562: IP  = 0;                            // Interrupt Priority: Disable all
 ;	genAssign
 	mov	_IP,#0x00
-;	../../main.c:563: PSW = 0;                            // Program Status World: Clear
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:563: PSW = 0;                            // Program Status World: Clear
 ;	genAssign
 	mov	_PSW,#0x00
-;	../../main.c:564: P0  = 0xFF;                         // Port 0: All alternate function Data/Address A0-A7
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:564: P0  = 0xFF;                         // Port 0: All alternate function Data/Address A0-A7
 ;	genAssign
 	mov	_P0,#0xff
-;	../../main.c:565: P1  = 0x00;                         // Port 1: We use as mixed function I/O: LCD Control
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:565: P1  = 0x00;                         // Port 1: We use as mixed function I/O: LCD Control
 ;	genAssign
 	mov	_P1,#0x00
-;	../../main.c:566: P2  = 0xFF;                         // Port 2: All alternate function Address A8-A15
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:566: P2  = 0xFF;                         // Port 2: All alternate function Address A8-A15
 ;	genAssign
 	mov	_P2,#0xff
-;	../../main.c:567: P3  = 0xFF;                         // Port 3: We use secondary functions like Interrupts
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:567: P3  = 0xFF;                         // Port 3: We use secondary functions like Interrupts
 ;	genAssign
 	mov	_P3,#0xff
-;	../../main.c:586: DATA_LATCH_MATRIX = 0x00;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:586: DATA_LATCH_MATRIX = 0x00;
 ;	genAssign
 	mov	dptr,#_DATA_LATCH_MATRIX
 ;	Peephole 181	changed mov to clr
 	clr	a
 	movx	@dptr,a
-;	../../main.c:587: DATA_LATCH_LED    = 0x00;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:587: DATA_LATCH_LED    = 0x00;
 ;	genAssign
 	mov	dptr,#_DATA_LATCH_LED
 ;	genFromRTrack acc==0x00
 	movx	@dptr,a
-;	../../main.c:588: DATA_LATCH_LCD    = 0x00;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:588: DATA_LATCH_LCD    = 0x00;
 ;	genAssign
 	mov	dptr,#_DATA_LATCH_LCD
 ;	genFromRTrack acc==0x00
 	movx	@dptr,a
-;	../../main.c:590: lcd_init();
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:590: lcd_init();
 ;	genCall
-;	../../main.c:604: }
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:604: }
 ;	Peephole 400.b	replaced lcall/ret with ljmp
 	ljmp	_lcd_init
 ;
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'main'
 ;------------------------------------------------------------
-;	../../main.c:610: int main(void)
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:610: int main(void)
 ;	-----------------------------------------
 ;	 function main
 ;	-----------------------------------------
 _main:
-;	../../main.c:616: NOP();
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:616: NOP();
 ;	genInline
 	nop 
-;	../../main.c:617: setup();        // Setup IO and Registers
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:617: setup();        // Setup IO and Registers
 ;	genCall
 	lcall	_setup
-;	../../main.c:619: set_led_status(LED_STATUS, true);
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:619: set_led_status(LED_STATUS, true);
 ;	genAssign
 	mov	r0,#_set_led_status_PARM_2
 	mov	a,#0x01
@@ -1083,96 +1074,96 @@ _main:
 ;	genCall
 	mov	dpl,#0x10
 	lcall	_set_led_status
-;	../../main.c:622: unsigned char a[17]="ETEP MATRIX 8031";    //string of 14 characters with a null terminator.
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:622: unsigned char a[17]="ETEP MATRIX 8031";    //string of 14 characters with a null terminator.
 ;	genPointerSet
 ;	genPagedPointerSet
-	mov	r0,#_main_a_65537_64
+	mov	r0,#_main_a_65537_63
 	mov	a,#0x45
 	movx	@r0,a
 ;	genPointerSet
 ;	genPagedPointerSet
-	mov	r0,#(_main_a_65537_64 + 0x0001)
+	mov	r0,#(_main_a_65537_63 + 0x0001)
 ;	genFromRTrack 0x54==swap(0x45)
 	swap	a
 	movx	@r0,a
 ;	genPointerSet
 ;	genPagedPointerSet
-	mov	r0,#(_main_a_65537_64 + 0x0002)
+	mov	r0,#(_main_a_65537_63 + 0x0002)
 ;	genFromRTrack 0x45==swap(0x54)
 	swap	a
 	movx	@r0,a
 ;	genPointerSet
 ;	genPagedPointerSet
-	mov	r0,#(_main_a_65537_64 + 0x0003)
+	mov	r0,#(_main_a_65537_63 + 0x0003)
 	mov	a,#0x50
 	movx	@r0,a
 ;	genPointerSet
 ;	genPagedPointerSet
-	mov	r0,#(_main_a_65537_64 + 0x0004)
+	mov	r0,#(_main_a_65537_63 + 0x0004)
 	mov	a,#0x20
 	movx	@r0,a
 ;	genPointerSet
 ;	genPagedPointerSet
-	mov	r0,#(_main_a_65537_64 + 0x0005)
+	mov	r0,#(_main_a_65537_63 + 0x0005)
 	mov	a,#0x4d
 	movx	@r0,a
 ;	genPointerSet
 ;	genPagedPointerSet
-	mov	r0,#(_main_a_65537_64 + 0x0006)
+	mov	r0,#(_main_a_65537_63 + 0x0006)
 	mov	a,#0x41
 	movx	@r0,a
 ;	genPointerSet
 ;	genPagedPointerSet
-	mov	r0,#(_main_a_65537_64 + 0x0007)
+	mov	r0,#(_main_a_65537_63 + 0x0007)
 	mov	a,#0x54
 	movx	@r0,a
 ;	genPointerSet
 ;	genPagedPointerSet
-	mov	r0,#(_main_a_65537_64 + 0x0008)
+	mov	r0,#(_main_a_65537_63 + 0x0008)
 	mov	a,#0x52
 	movx	@r0,a
 ;	genPointerSet
 ;	genPagedPointerSet
-	mov	r0,#(_main_a_65537_64 + 0x0009)
+	mov	r0,#(_main_a_65537_63 + 0x0009)
 	mov	a,#0x49
 	movx	@r0,a
 ;	genPointerSet
 ;	genPagedPointerSet
-	mov	r0,#(_main_a_65537_64 + 0x000a)
+	mov	r0,#(_main_a_65537_63 + 0x000a)
 	mov	a,#0x58
 	movx	@r0,a
 ;	genPointerSet
 ;	genPagedPointerSet
-	mov	r0,#(_main_a_65537_64 + 0x000b)
+	mov	r0,#(_main_a_65537_63 + 0x000b)
 	mov	a,#0x20
 	movx	@r0,a
 ;	genPointerSet
 ;	genPagedPointerSet
-	mov	r0,#(_main_a_65537_64 + 0x000c)
+	mov	r0,#(_main_a_65537_63 + 0x000c)
 	mov	a,#0x38
 	movx	@r0,a
 ;	genPointerSet
 ;	genPagedPointerSet
-	mov	r0,#(_main_a_65537_64 + 0x000d)
+	mov	r0,#(_main_a_65537_63 + 0x000d)
 	mov	a,#0x30
 	movx	@r0,a
 ;	genPointerSet
 ;	genPagedPointerSet
-	mov	r0,#(_main_a_65537_64 + 0x000e)
+	mov	r0,#(_main_a_65537_63 + 0x000e)
 	mov	a,#0x33
 	movx	@r0,a
 ;	genPointerSet
 ;	genPagedPointerSet
-	mov	r0,#(_main_a_65537_64 + 0x000f)
+	mov	r0,#(_main_a_65537_63 + 0x000f)
 	mov	a,#0x31
 	movx	@r0,a
 ;	genPointerSet
 ;	genPagedPointerSet
-	mov	r0,#(_main_a_65537_64 + 0x0010)
+	mov	r0,#(_main_a_65537_63 + 0x0010)
 ;	Peephole 181	changed mov to clr
 	clr	a
 	movx	@r0,a
-;	../../main.c:624: while(a[l] != '\0') // searching the null terminator in the sentence
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:624: while(a[l] != '\0') // searching the null terminator in the sentence
 ;	genAssign
 ;	genFromRTrack replaced	mov	r6,#0x00
 ;	Peephole 236.i	used r6 instead of ar6
@@ -1183,7 +1174,7 @@ _main:
 00101$:
 ;	genPlus
 	mov	a,r6
-	add	a,#_main_a_65537_64
+	add	a,#_main_a_65537_63
 	mov	r1,a
 ;	genPointerGet
 ;	genPagedPointerGet
@@ -1195,7 +1186,7 @@ _main:
 ;	Peephole 108.c	removed ljmp by inverse jump logic
 	jz	00105$
 ;	Peephole 500	removed redundant label 00122$
-;	../../main.c:626: lcd_data(a[l]);
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:626: lcd_data(a[l]);
 ;	genCall
 	mov	dpl,r5
 	push	ar7
@@ -1203,11 +1194,11 @@ _main:
 	lcall	_lcd_data
 	pop	ar6
 	pop	ar7
-;	../../main.c:627: l++;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:627: l++;
 ;	genPlus
 ;	genPlusIncr
 	inc	r6
-;	../../main.c:636: bool state = true;
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:636: bool state = true;
 ;	Peephole 112.b	changed ljmp to sjmp
 ;	Peephole 243	avoided branch to sjmp
 	cjne	r6,#0x00,00101$
@@ -1215,11 +1206,11 @@ _main:
 ;	Peephole 500	removed redundant label 00123$
 	sjmp	00101$
 00105$:
-;	../../main.c:638: NOP();
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:638: NOP();
 ;	genInline
 	nop 
 ;	Peephole 112.b	changed ljmp to sjmp
-;	../../main.c:687: }
+;	C:\K33\OneDrive\Projects\Working\8031 Contoller - 20230816\Sources\8031-matrix\main.c:687: }
 	sjmp	00105$
 ;	Peephole 259.a	removed redundant label 00107$ and ret
 	.area CSEG    (CODE)
