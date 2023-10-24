@@ -26,28 +26,27 @@ function(ihx_to_hex bin)
     add_custom_command(TARGET ${bin} POST_BUILD COMMAND  packihx ${bin}.ihx > ${bin}.hex)
 endfunction(ihx_to_hex)
 
-
 project(8031-matrix)
 set(CMAKE_SYSTEM_VERSION 1)
-#set(CMAKE_SYSTEM_PROCESSOR 8051)
-#set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+set(CMAKE_SYSTEM_PROCESSOR 8051)
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_C_STANDARD 99)
+set(CMAKE_VERBOSE_MAKEFILE on )
 
-## adjust the default behaviour of the FIND_XXX() commands:
-## search headers and libraries in the target environment, search
-## programs in the host environment
-#set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-#set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-#set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-#
-## not supported by sdcc
-#set(CMAKE_C_CREATE_SHARED_LIBRARY "")
-#set(CMAKE_C_CREATE_MODULE_LIBRARY "")
+# adjust the default behaviour of the FIND_XXX() commands:
+# search headers and libraries in the target environment, search
+# programs in the host environment
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+
+# not supported by sdcc
+set(CMAKE_C_CREATE_SHARED_LIBRARY "")
+set(CMAKE_C_CREATE_MODULE_LIBRARY "")
 
 # SDCC Compile Options
 #include_directories("${LOCAL_SDCC}/../include")
-
 
 #set(CMAKE_C_FLAGS " -mmcs51 --model-medium -DSDCC_CYGNAL --less-pedantic  --stack-auto --no-peep --int-long-reent --float-reent")
 set(CMAKE_C_FLAGS "-V --std c99 -mmcs51 -p8031 --model-medium --fverbose-asm")
@@ -62,6 +61,9 @@ set(CMAKE_C_FLAGS "-V --std c99 -mmcs51 -p8031 --model-medium --fverbose-asm")
 #add_link_options(-mmcs51)
 #add_link_options(-p8031)
 #add_link_options(--model-medium)
+#add_link_options(-Wl-bCSEG=0x100)
+#add_link_options(-V)                 # Verbose
+#add_link_options(--fverbose-asm)     # Include code generator comments in the asm output
 #
 #
 #add_compile_options(--int-long-reent)   # Use reentrant calls on the int and long support functions
@@ -101,6 +103,7 @@ set(CMAKE_C_FLAGS "-V --std c99 -mmcs51 -p8031 --model-medium --fverbose-asm")
 # add_library(uartlib STATIC uart.c)
 
 include_directories("library")
+
 
 
 # Define witch project compile

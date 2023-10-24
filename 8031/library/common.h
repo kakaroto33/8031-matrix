@@ -14,4 +14,6 @@
     __endasm  \
 
 
+void _delay_ms(unsigned int time_ms);
+
 #endif //ETEP_SDCC_COMMON_H

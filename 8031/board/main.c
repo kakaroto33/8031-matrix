@@ -4,308 +4,20 @@
  * Main executable.
  */
 
-//#include "main.h"
+#include "main.h"
 //#include <stdio.h>
 #include <stdio.h>
 #include <mcs51/8051.h>
 #include <stdbool.h>
 #include "common.h"
+#include "LCD_1602.h"
 
 //#include "library/common.h"
 #define TOOLCHAIN SDCC
 // #define SDCC 1
 #define UART_CLOCK_SOURCE __TIMER_1__
 
-//######################################################################################################################
-//# UART.h ###############################################################################################################
-//######################################################################################################################
 
-
-#ifndef __uart_h__
-#define __uart_h__
-
-// UART Clock Source
-#define __TIMER_1__                  0
-#define __TIMER_2__                  1
-
-#ifndef UART_CLOCK_SOURCE
-#define UART_CLOCK_SOURCE            __TIMER_2__
-#endif
-
-#ifndef SDCC
-#define SDCC 0
-#endif
-#ifndef KEIL
-#define KEIL 1
-#endif
-
-#ifndef TOOLCHAIN
-#define TOOLCHAIN SDCC
-#endif
-
-#include <stdio.h>            // Standard input/output file used in Serialintwrite (sprintf)
-
-// Serial Interrupt Enable
-#define SERIAL_RX_INTERRUPT_ENABLE
-
-// UART Buffer Size
-#define UART_RX_BUFFER_SIZE          20
-
-// New Line Index Buffer Size
-#define NEW_LINE_INDEX_BUFFER_SIZE   10
-
-// BaudRate Calculation
-#define  __baudRate_calc_timer_1(__freq,__baud) (256 - ((__freq/384) / __baud))
-#define  __baudRate_calc_timer_2(__freq,__baud) (65536 - (__freq/(__baud*32)))
-
-// ASCII Code Definitions
-#define NUL 0x00                          // Null Character
-#define SOH 0x01                          // Start Of Heading
-#define STX 0x02                          // Start Of Text
-#define ETX 0x03                          // End Of Text
-#define EOT 0x04                          // End of Transmission
-#define ENQ 0x05                          // Enquiry
-#define ACK 0x06                          // Acknowledgement
-#define BEL 0x07                          // Bell
-#define BS  0x08                          // Back Space
-#define TAB 0x09                          // Horizontal TAB
-#define LF  0x0A                          // Line Feed (Newline)
-#define VT  0x0B                          // Vertical TAB
-#define NP  0x0C                          // New Page
-#define CR  0x0D                          // Carriage Return
-#define SO  0x0E                          // Shift OUT
-#define SI  0x0F                          // Shift IN
-#define DLE 0x10                          // Data Link Escape
-#define DC1 0x11                          // Device Control 1
-#define DC2 0x12                          // Device Control 2
-#define DC3 0x13                          // Device Control 3
-#define DC4 0x14                          // Device Control 4
-#define NAK 0x15                          // Negative Acknowledgement
-#define SYN 0x16                          // Synchronous Idle
-#define ETB 0x17                          // End of Trans. Block
-#define CAN 0x18                          // Cancel
-#define EM  0x19                          // End of Medium
-#define SUB 0x1A                          // Substitute
-#define ESC 0x1B                          // Escape
-#define FS  0x1C                          // File Seperator
-#define GS  0x1D                          // Group Seperator
-#define RS  0x1E                          // Record Seperator
-#define US  0x1F                          // Unit Seperator
-
-#define CHAR_NULL '\0'
-
-/***************** Prototypes ****************************/
-extern void           Serialbegin(unsigned long,unsigned long);
-extern unsigned char Serialavailable(void);
-extern void           Serialwrite(unsigned char);
-extern void           Serialprint(unsigned char *);
-extern unsigned char  Serialread(void);
-extern void           SerialIntWrite(signed int);
-extern void           SetOsc(unsigned long);
-
-
-#ifdef SERIAL_RX_INTERRUPT_ENABLE
-
-/*extern void          uartISR(void) __interrupt (4);*/
-extern void          setSerialinterrupt(void);
-extern void          Serialflush(void);
-extern volatile unsigned char          uartNewLineFlag;
-extern volatile unsigned char          uartReadByte;
-extern volatile unsigned char          uartReadBuffer[UART_RX_BUFFER_SIZE];
-extern volatile unsigned int           uartReadCount;
-extern volatile unsigned char          uartNewLineCount;
-extern volatile unsigned char          uartNewLineIndexes[NEW_LINE_INDEX_BUFFER_SIZE];
-#endif
-
-#endif
-
-//######################################################################################################################
-//# UART.c ###############################################################################################################
-//######################################################################################################################
-
-// Globals
-#ifdef SERIAL_RX_INTERRUPT_ENABLE
-
-// Uart New Line Flag (Set when new line received)
-volatile unsigned char uartNewLineFlag = 0;
-// UART Read Buffer to store Received Data
-volatile unsigned char uartReadBuffer[UART_RX_BUFFER_SIZE];
-// Uart Byte Count
-volatile unsigned int  uartReadCount    = 0;
-// Uart New Line Count
-volatile unsigned char uartNewLineCount = 0;
-// It holds every new line index
-volatile unsigned char uartNewLineIndexes[NEW_LINE_INDEX_BUFFER_SIZE];
-// It hold single byte (Last Received)
-volatile unsigned char uartReadByte = CHAR_NULL;
-
-#endif
-
-
-/*** Function    : Serialbegin
-**   Parameters  : unsigned long (OscillatorFrequency),unsigned long (Standard BaudRate)
-**   Parameters  : unsigned long (OscillatorFrequency),unsigned long (Standard BaudRate)
-**   Return      : None
-**   Description : It will Set the baud rate for serial communication
-**/
-void Serialbegin(unsigned long OscillatorFrequency,unsigned long baudRate)
-{
-    volatile unsigned int autoReloadvalue;
-
-#if UART_CLOCK_SOURCE == __TIMER_1__
-    autoReloadvalue =  __baudRate_calc_timer_1(OscillatorFrequency,baudRate);
-    TMOD  |= 0x20;
-    SCON  |= 0x50;
-    TL1    = autoReloadvalue >> 8;
-    TH1    = autoReloadvalue;
-    TR1    = 1;
-#elif UART_CLOCK_SOURCE == __TIMER_2__
-    autoReloadvalue=  __baudRate_calc_timer_2(OscillatorFrequency,baudRate);
-    T2CON = 0x00;
-    T2CON = 0x30;
-    SCON  = 0x50;
-    RCAP2H = autoReloadvalue >> 8;
-    RCAP2L = autoReloadvalue;
-    TH2 = autoReloadvalue >> 8;
-    TL2 = autoReloadvalue;
-    TR2    = 1;
-#endif
-
-}
-
-/*** Function    : Serialavailable
-**   Parameters  : None
-**   Return      : __bit (If byte is available in receive buffer returns 1, else returns 0)
-**   Description : It will give the whether Receiver is available or not
-**/
-unsigned char Serialavailable(void)
-{
-    return RI;
-}
-
-
-/*** Function    : Serialwrite
-**   Parameters  : unsigned char (Single character that will send to UART)
-**   Return      : None
-**   Description : It will write single character to UART
-**/
-void Serialwrite(unsigned char Byte)
-{
-#ifdef SERIAL_RX_INTERRUPT_ENABLE
-    EA = 0;
-#endif
-    SBUF = Byte;
-    while(!TI);
-    TI   = 0;
-#ifdef SERIAL_RX_INTERRUPT_ENABLE
-    EA = 1;
-#endif
-}
-
-
-
-/*** Function    : Serialread
-**   Parameters  : None
-**   Return      : unsigned char
-**   Description : It will read single byte from uart
-**/
-unsigned char Serialread(void)
-{
-    while(!RI);
-    return SBUF;
-}
-
-/*** Function    : Serialprint
-**   Parameters  : unsigned char *
-**   Return      : None
-**   Description : It will send the string to UART
-**/
-void Serialprint(unsigned char *sPtr)
-{
-    for(;*sPtr!='\0';Serialwrite(*(sPtr++)));
-}
-
-
-/*** Function    : Serialprint
-**   Parameters  : unsigned char *
-**   Return      : None
-**   Description : It will send the string to UART
-**/
-void SerialIntWrite(signed int num)
-{
-    char *tempBuffer;
-    sprintf(tempBuffer,"%d",num);
-    Serialprint((unsigned char*)tempBuffer);
-}
-
-
-#ifdef SERIAL_RX_INTERRUPT_ENABLE
-
-/*** Function    : setSerialinterrupt
-**   Parameters  : None
-**   Return      : None
-**   Description : It sets the Serial Interrupt
-**/
-void setSerialinterrupt(void)
-{
-    ES = 1;
-    EA = 1;
-}
-
-/*** Function    : Serialflush
-**   Parameters  : None
-**   Return      : None
-**   Description : It clears the UART buffer,Index Buffer and Flags
-**/
-void Serialflush(void)
-{
-    unsigned char i;
-    uartReadCount    = 0;           // Clear Uart Byte Count
-    uartNewLineFlag  = 0;           // Clear New Line Flag
-    uartNewLineCount = 0;           // Clear New Line Count
-    uartReadByte     = CHAR_NULL;   // Clear Last Read Byte
-
-// Flush New Line Index Buffer
-    for(i=0;i<=NEW_LINE_INDEX_BUFFER_SIZE;i++)
-        uartNewLineIndexes[i] = CHAR_NULL;
-
-// Flush Uart Read Buffer
-    for(i=0;i<=UART_RX_BUFFER_SIZE;i++)
-        uartReadBuffer[i] = CHAR_NULL;
-}
-
-/*** Function    : SerialReadByteFlush
-**   Parameters  : None
-**   Return      : None
-**   Description : It clears the UART Read Byte (uartReadByte)
-**/
-void SerialReadByteFlush(void)
-{
-    uartReadByte     = CHAR_NULL;   // Clear Last Read Byte
-}
-
-/*** Function    : uartISR
-**   Parameters  : None
-**   Return      : None
-**   Description : It is ISR for UART Receive (It will trigger if any byte is received)
-**/
-//
-//void uartISR(void) __interrupt (4)
-//{
-//    EA = 0;                                      // Disable Global Interrupt Flag
-//    RI = 0;                                      // Clear RI flag
-//    uartReadByte = SBUF;                         // Read Byte from SBUF
-//    uartReadBuffer[uartReadCount++] = uartReadByte;
-//    if(uartReadByte == LF)
-//    {
-//        uartNewLineIndexes[uartNewLineCount] = uartReadCount;
-//        uartNewLineCount++;
-//        uartNewLineFlag = 1;
-//    }
-//    EA = 1;                                     // Everything is done , Now Enable the Global Interrupt
-//}
-
-#endif
 
 //######################################################################################################################
 //######################################################################################################################
@@ -346,9 +58,9 @@ void SerialReadByteFlush(void)
 // Matrix latches is accessible in high address as RAM, need Write operations (WR#)
 // These port controls is all on A15:HIGH or address above 0x8000
 // WR_A15 = (A15 NAND ¬WR#)
-__xdata __at (0xB000) unsigned char DATA_LATCH_MATRIX;      // WR_A15:LOW, A14:LOW , A13:HIGH, A12:HIGH = MATRIX_DATA:HIGH
-__xdata __at (0xD000) unsigned char DATA_LATCH_LED;         // WR_A15:LOW, A14:HIGH, A13:LOW , A12:HIGH = LED_DATA:HIGH
-__xdata __at (0xE000) unsigned char DATA_LATCH_LCD;         // WR_A15:LOW, A14:HIGH, A13:HIGH, A12:LOW  = LCD_DATA:HIGH
+//__xdata __at (0xB000) unsigned char DATA_LATCH_MATRIX;      // WR_A15:LOW, A14:LOW , A13:HIGH, A12:HIGH = MATRIX_DATA:HIGH
+//__xdata __at (0xD000) unsigned char DATA_LATCH_LED;         // WR_A15:LOW, A14:HIGH, A13:LOW , A12:HIGH = LED_DATA:HIGH
+//__xdata __at (0xE000) unsigned char DATA_LATCH_LCD;         // WR_A15:LOW, A14:HIGH, A13:HIGH, A12:LOW  = LCD_DATA:HIGH
 
 //== INTERRUPTS ================================================================
 
@@ -362,14 +74,16 @@ __xdata __at (0xE000) unsigned char DATA_LATCH_LCD;         // WR_A15:LOW, A14:H
 
 //-- PORT P1 -------------------------------------------------------------------
 // LCD Controls
-#define LCD_RS    P1_0                  // LCD Register Select: Data(High)/Instruction(LOW)
-#define LCD_RW    P1_1                  // LCD Read(HIGH)/Write(LOW)
-#define LCD_E     P1_2                  // LCD Enable
+//#define LCD_RS    P1_0                  // LCD Register Select: Data(High)/Instruction(LOW)
+//#define LCD_RW    P1_1                  // LCD Read(HIGH)/Write(LOW)
+//#define LCD_E     P1_2                  // LCD Enable
 // P1.3                                 Not used
 // P1.4                                 Not used
 // P1.5                                 Not used
 // P1.6                                 Not used
 // P1.7                                 Not used
+
+#include "LCD_1602.h"
 
 //-- PORT P3 -------------------------------------------------------------------
 // P3.0 => RxD                          Serial Data Read
@@ -404,13 +118,6 @@ __xdata __at (0xE000) unsigned char DATA_LATCH_LCD;         // WR_A15:LOW, A14:H
 
 unsigned char led_status_map = 0x00;    // 8 Bytes: Keep LED states to update LED_DATA
 
-//== SPECIAL FUNCTIONS =========================================================
-// This a single Assemble Instruction NOP
-// On 8051 Family this will take 12 clock cycles.
-#define NOP() \
-    __asm     \
-        nop   \
-    __endasm  \
 
 //== Matrix Functions ==========================================================
 
@@ -473,61 +180,6 @@ void ms_delay(unsigned int time) {
 }
 
 //== LCD Functions =============================================================
-//TODO: Move to external lib
-// FROM: https://circuitdigest.com/microcontroller-projects/lcd-interfacing-with-8051-microcontroller-89s52
-//
-//#define display_port P2      //Data pins connected to port 2 on microcontroller
-//sbit rs = P3^2;  //RS pin connected to pin 2 of port 3
-//sbit rw = P3^3;  // RW pin connected to pin 3 of port 3
-//sbit e =  P3^4;  //E pin connected to pin 4 of port 3
-
-
-
-/**
- * Function to send command instruction to LCD
- * @param command
- */
-void lcd_cmd(unsigned char command)
-{
-    DATA_LATCH_LCD = command;
-    LCD_RS   = 0;
-    LCD_RW   = 0;
-    LCD_E    = 1;
-    //ms_delay(1);
-    LCD_E    = 0;
-}
-
-/**
- * Function to send display data to LCD
- * @param disp_data
- */
-void lcd_data(unsigned char disp_data)
-{
-    DATA_LATCH_LCD = disp_data;
-    LCD_RS   = 1;
-    LCD_RW   = 0;
-    LCD_E    = 1;
-    //ms_delay(1);
-    LCD_E    = 0;
-}
-
-/**
- * Function to prepare the LCD  and get it ready
- */
-void lcd_init(void)
-{
-    lcd_cmd(0x38);  // for using 2 lines and 5X7 matrix of LCD
-    //ms_delay(10);
-    lcd_cmd(0x0F);  // turn display ON, cursor blinking
-    //ms_delay(10);
-    lcd_cmd(0x01);  // clear screen
-    //ms_delay(10);
-    //lcd_cmd(0x81);  // bring cursor to position 1 of line 1
-    lcd_cmd(0x80);  // bring cursor to position 0 of line 1
-    //ms_delay(10);
-    NOP();  // This fix some randon behavior on compiler ??
-}
-
 
 //== Tests =====================================================================
 // TODO: Make serial implementation
@@ -636,6 +288,7 @@ int main(void)
     bool state = true;
     for(;;) {
         NOP();
+        _delay_ms(10);
         // Set LED Status ON and OFF each loop
 //        set_led_status(LED_STATUS, state);
 //        ms_delay(100);
