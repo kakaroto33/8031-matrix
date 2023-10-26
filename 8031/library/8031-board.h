@@ -7,13 +7,12 @@
 #ifndef ETEP_SDCC_8031_BOARD_H
 #define ETEP_SDCC_8031_BOARD_H
 
-//----------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 //#include <stdio.h>
 #include <mcs51/8051.h>
 #include <stdbool.h>
-
-//#include "library/common.h"
+#include "common.h"
 
 //== MEMORY MAP ================================================================
 
@@ -47,7 +46,8 @@
 // RDPSEN#    = (PSEN# AND RD#)         // Its AND gate, whenever PSEN:LOW or RD:LOW = RDPSEN:LOW
 // CS_EEPROM# = (A14 NAND ¬A15)         // Its NAND gate, where A15 has NOT gate, A14:HIGH and A15:LOW = CS_EPROM:LOW
 
-//== DATA LATCHES ============================================================
+//== DATA LATCHES ==============================================================
+
 // Matrix latches is accessible in high address as RAM, need Write operations (WR#)
 // These port controls is all on A15:HIGH or address above 0x8000
 // WR_A15 = (A15 NAND ¬WR#)
@@ -80,15 +80,16 @@ __xdata __at (0xE000) unsigned char DATA_LATCH_LCD;         // WR_A15:LOW, A14:H
 // P3.0 => RxD                          Serial Data Read
 // P3.1 => TxD                          Serial Data Transmit
 // ROTATORY ENCODER
-#define ROT_CLOCK   P3_2                // ROTATORY: [INTERRUPT 0] Clock
-#define ROT_SWITCH  P3_3                // ROTATORY: [INTERRUPT 1] Switch
-#define ROT_DATA    P3_4                // ROTATORY: Data
+//#define ROT_CLOCK   P3_2                // ROTATORY: [INTERRUPT 0] Clock
+//#define ROT_SWITCH  P3_3                // ROTATORY: [INTERRUPT 1] Switch
+//#define ROT_DATA    P3_4                // ROTATORY: Data
 // P3.5 => TIMER1                       Not used
 // P3.6 => WR#                          External RAM Write
 // P3.7 => WR#                          External RAM Read
 
 //== STATUS LED'S ==============================================================
-// There 7 LED's on leds on LED_DATA latch
+
+// There 7 LEDs on LED_DATA latch
 
 #define LED_MATRIX      0x01            // [0b00000001] YELLOW: Matrix routine is running
 #define LED_ENC_INPUT   0x02            // [0b00000010] YELLOW: Encode input (clock or switch)
@@ -100,93 +101,23 @@ __xdata __at (0xE000) unsigned char DATA_LATCH_LCD;         // WR_A15:LOW, A14:H
 //                      0x80            // RED: Last LED is connected to reset button.
 
 
-//== Matrix Functions ==========================================================
-
-///**
-// * Update Matrix A and Led States
-// * @param value
-// */
-//void update_matrix_da(unsigned char value)
-//{
-//    MATRIX_DA = value | led_matrix_da;
-//}
-//
-///**
-// * Update Matrix B and Led States
-// * @param value
-// */
-//void update_matrix_db(unsigned char value)
-//{
-//    MATRIX_DB = value | led_matrix_db;
-//}
-
-//== Main Functions ============================================================
-
+//== BOARD FUNCTIONS ===========================================================
 
 /**
- * Setup CPU IO and Registers
+ * Setup 8031 board SFR and Variables.
+ */
+void setup_8031_board(void);
+
+/**
+ *
+ * @param unsigned char led
+ * @param bool state
  * @return void
  */
-void setup(void)
-{
-    IE  = 0;                            // Interrupt Enable: Disable all
-    EA  = 0;
-    IP  = 0;                            // Interrupt Priority: Disable all
-    PSW = 0;                            // Program Status World: Clear
-    P0  = 0xFF;                         // Port 0: All alternate function Data/Address A0-A7
-    P1  = 0x00;                         // Port 1: We use as mixed function I/O: LCD Control
-    P2  = 0xFF;                         // Port 2: All alternate function Address A8-A15
-    P3  = 0xFF;                         // Port 3: We use secondary functions like Interrupts
-
-    //   P1.0 - RxD     Alternate
-    //   P1.1 - TxD     Alternate
-    //   P1.2 - NC
-    //   P1.3 - LCD_RS  Buss
-    //   P1.4 - LCD_RW  Buss
-    //   P1.5 - LCD_E   Buss
-    //   P1.6 - WR#     Alternate
-    //   P1.7 - RD#     Alternate
-
-//    led_matrix_da = 0x00;               // Reset LED state
-//    led_matrix_db = 0x00;               // Reset LED state
-//    // Set LED Status ON
-//    set_matrix_status(LED_STATUS, true);
-//    // Update Matrix Latch A
-//    update_matrix_da(0x00);
-//    // Update Matrix Latch A
-//    update_matrix_db(0x00);
-    DATA_LATCH_MATRIX = 0x00;
-    DATA_LATCH_LED    = 0x00;
-    DATA_LATCH_LCD    = 0x00;
-
-    lcd_init();
-
-//    volatile unsigned int autoReloadvalue = 200;
-//    TMOD  |= 0x20;
-//    SCON  |= 0x50;
-//    TL1    = autoReloadvalue >> 8;
-//    TH1    = autoReloadvalue;
-//    TR1    = 1;
-
-    //SetOsc(OSC_FREQ);             // Set Oscillator Freq
-    //Serialbegin(OSC_FREQ, BAUD_RATE);       // Set Baud Rate
-//    Serialflush();                // Clear the buffers
-//    Serialprint("uart test\n\r"); // Print a string
-//    setSerialinterrupt();         // Enable Serial Interrupt
-}
+void set_led_status(unsigned char led, bool state);
 
 
-
-
-
-
-
-
-
-
-
-
-
+//== MATRIX FUNCTIONS ==========================================================
 
 
 

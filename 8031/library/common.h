@@ -13,7 +13,11 @@
         nop   \
     __endasm  \
 
-
-void _delay_ms(unsigned int time_ms);
+/**
+ * Function for creating delay in milliseconds.
+ * Current Clock 11.1 MHz
+ * @param time
+ */
+void delay_ms(unsigned int time_ms);
 
 #endif //ETEP_SDCC_COMMON_H

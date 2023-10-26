@@ -2,7 +2,7 @@
 // Created by haroldo on 24/10/2023.
 //
 
-#include "UART.h"
+#include "uart.h"
 
 
 // Globals

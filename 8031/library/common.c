@@ -9,10 +9,10 @@
  * Current Clock 11.1 MHz
  * @param time
  */
-void _delay_ms(unsigned int time_ms){
+void delay_ms(unsigned int time_ms){
 
     // Must calculate from CPU clock/cristal
-    //CPU_CLOCK
+    // CPU_CLOCK
     // Clock: 12MHz = 83.333ns
     // Cycles per loop for = 12 ~= 999,96ms ~= 1us
     unsigned i,j,one_ms ;

@@ -5,7 +5,8 @@ project(8031-board)
 # Used Library File List
 file(GLOB LIB_FILES
     ../library/common.c
-    ../library/LCD_1602.c
+    ../library/8031-board.c
+    #../library/lcd-1602.c
 )
 
 # Working with libraries linking

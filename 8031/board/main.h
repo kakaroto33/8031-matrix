@@ -1,23 +1,24 @@
 //
 // Created by haroldo on 13/09/2023.
 //
-
-#include <mcs51/8051.h>
-#include <stdbool.h>
-#include "common.h"
-#include "LCD_1602.h"
+//
 
 #ifndef ETEP_SDCC_MAIN_H_H
 #define ETEP_SDCC_MAIN_H_H
 
-__xdata __at (0xB000) unsigned char DATA_LATCH_MATRIX;      // WR_A15:LOW, A14:LOW , A13:HIGH, A12:HIGH = MATRIX_DATA:HIGH
-__xdata __at (0xD000) unsigned char DATA_LATCH_LED;         // WR_A15:LOW, A14:HIGH, A13:LOW , A12:HIGH = LED_DATA:HIGH
-__xdata __at (0xE000) unsigned char DATA_LATCH_LCD;         // WR_A15:LOW, A14:HIGH, A13:HIGH, A12:LOW  = LCD_DATA:HIGH
+//#include <mcs51/8051.h>
+//#include <stdbool.h>
+//#include "common.h"
+//#include "lcd-1602.h"
 
+#include <stdbool.h>
+#include <mcs51/8051.h>
+#include "8031-board.h"
 
-#define LCD_RS    P1_0                  // LCD Register Select: Data(High)/Instruction(LOW)
-#define LCD_RW    P1_1                  // LCD Read(HIGH)/Write(LOW)
-#define LCD_E     P1_2                  // LCD Enable
+/**
+ * Main function
+ */
+int main(void);
 
 #endif //ETEP_SDCC_MAIN_H_H
 

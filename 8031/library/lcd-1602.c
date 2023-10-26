@@ -2,7 +2,7 @@
 // Created by haroldo on 24/10/2023.
 //
 #include <mcs51/8051.h>
-#include "LCD_1602.h"
+#include "lcd-1602.h"
 
 //TODO: Move to external lib
 // FROM: https://circuitdigest.com/microcontroller-projects/lcd-interfacing-with-8051-microcontroller-89s52
